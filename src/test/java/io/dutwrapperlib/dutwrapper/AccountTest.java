@@ -3,9 +3,10 @@ package io.dutwrapperlib.dutwrapper;
 import org.junit.jupiter.api.Test;
 
 import io.dutwrapperlib.dutwrapper.customrequest.CustomResponse;
-import io.dutwrapperlib.dutwrapper.objects.accounts.AccountInformation;
-import io.dutwrapperlib.dutwrapper.objects.accounts.SubjectFeeItem;
-import io.dutwrapperlib.dutwrapper.objects.accounts.SubjectScheduleItem;
+import io.dutwrapperlib.dutwrapper.model.accounts.AccountInformation;
+import io.dutwrapperlib.dutwrapper.model.accounts.SubjectFeeItem;
+import io.dutwrapperlib.dutwrapper.model.accounts.SubjectScheduleItem;
+import io.dutwrapperlib.dutwrapper.model.accounts.trainingresult.AccountTrainingStatus;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -20,12 +21,12 @@ class AccountTest {
         Account.login(
                 sessionId,
                 user,
-                pass
-        );
+                pass);
 
         if (Account.isLoggedIn(sessionId)) {
             System.out.println("Logged in!");
-        } else throw new Exception("This Session ID hasn't logged in!");
+        } else
+            throw new Exception("This Session ID hasn't logged in!");
     }
 
     static void getSubjectSchedule(String sessionId, Integer year, Integer semester) throws Exception {
@@ -40,12 +41,17 @@ class AccountTest {
         AccountInformation accInfo = Account.getAccountInformation(sessionId);
     }
 
+    static void getAccountTrainingStatus(String sessionId) throws Exception {
+        AccountTrainingStatus accountTrainingStatus = Account.getAccountTrainingStatus(sessionId);
+    }
+
     static void logout(String sessionId) throws Exception {
         Account.logout(sessionId);
 
         if (!Account.isLoggedIn(sessionId)) {
             System.out.println("Logged out!");
-        } else throw new Exception("This Session ID hasn't logged out yet!");
+        } else
+            throw new Exception("This Session ID hasn't logged out yet!");
     }
 
     @Test
@@ -78,6 +84,9 @@ class AccountTest {
 
         // Account information
         getAccountInformation(sessionId);
+
+        // Account training status
+        getAccountTrainingStatus(sessionId);
 
         // Logout
         logout(sessionId);

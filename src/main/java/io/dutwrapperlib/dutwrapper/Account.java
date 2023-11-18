@@ -9,25 +9,30 @@ import io.dutwrapperlib.dutwrapper.customrequest.CustomRequest;
 import io.dutwrapperlib.dutwrapper.customrequest.CustomRequestItem;
 import io.dutwrapperlib.dutwrapper.customrequest.CustomRequestList;
 import io.dutwrapperlib.dutwrapper.customrequest.CustomResponse;
-import io.dutwrapperlib.dutwrapper.objects.accounts.*;
+import io.dutwrapperlib.dutwrapper.model.accounts.*;
+import io.dutwrapperlib.dutwrapper.model.accounts.trainingresult.AccountTrainingStatus;
+import io.dutwrapperlib.dutwrapper.model.accounts.trainingresult.GraduateStatus;
+import io.dutwrapperlib.dutwrapper.model.accounts.trainingresult.SubjectResult;
+import io.dutwrapperlib.dutwrapper.model.accounts.trainingresult.TrainingSummary;
 
 import javax.annotation.Nullable;
 
-import static io.dutwrapperlib.dutwrapper.Variables.URL_MAINPAGE;
+import static io.dutwrapperlib.dutwrapper.Variables.*;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 
-@SuppressWarnings({"SpellCheckingInspection", "UnusedReturnValue"})
+@SuppressWarnings({ "SpellCheckingInspection", "UnusedReturnValue" })
 public class Account {
-    private static final SessionExternalFunction extFunc = new SessionExternalFunction() {
+    private static final WebDocumentUtils extFunc = new WebDocumentUtils() {
         public @Nullable String getValueByID(Document webData, String elementId) {
             Element element = webData.getElementById(elementId);
             if (element != null) {
                 return element.val().length() > 0 ? element.val() : null;
-            } else return null;
+            } else
+                return null;
         }
 
         // https://stackoverflow.com/a/22929670
@@ -71,16 +76,14 @@ public class Account {
                 sessionIdToCookie(sessionId),
                 Variables.URL_LOGIN,
                 requestList.toURLEncodeByteArray("UTF-8"),
-                60
-        );
+                60);
     }
 
     public static Boolean isLoggedIn(String sessionId) throws IOException {
         CustomResponse response = CustomRequest.get(
                 sessionIdToCookie(sessionId),
                 Variables.URL_CHECKLOGGEDIN,
-                60
-        );
+                60);
 
         return response.getReturnCode() >= 200 && response.getReturnCode() < 300;
     }
@@ -89,11 +92,15 @@ public class Account {
         return CustomRequest.get(
                 sessionIdToCookie(sessionId),
                 Variables.URL_LOGOUT,
-                60
-        );
+                60);
     }
 
-    public static ArrayList<SubjectScheduleItem> getSubjectSchedule(String sessionId, Integer year, Integer semester) throws Exception {
+    public static ArrayList<SubjectScheduleItem> getSubjectSchedule(String sessionId, Integer year, Integer semester)
+            throws Exception {
+        if (!isLoggedIn(sessionId)) {
+            throw new Exception("No account logged in this session. May be you haven't logged in?");
+        }
+
         String url;
         switch (semester) {
             case 1:
@@ -110,11 +117,11 @@ public class Account {
         CustomResponse response = CustomRequest.get(
                 sessionIdToCookie(sessionId),
                 url,
-                60
-        );
+                60);
 
         if (response.getReturnCode() < 200 || response.getReturnCode() >= 300)
-            throw new Exception("Server was return with code " + response.getReturnCode() + ". May be you haven't logged in?");
+            throw new Exception(
+                    "Server was return with code " + response.getReturnCode() + ". May be you haven't logged in?");
 
         Document webData = Jsoup.parse(response.getContentHtmlString());
 
@@ -153,7 +160,8 @@ public class Account {
                             if (cellSplitItem.toUpperCase().contains("CN")) {
                                 scheduleItem.setDayOfWeek(0);
                             } else {
-                                scheduleItem.setDayOfWeek(Integer.parseInt(cellSplitItem.split(",")[0].split(" ")[1]) - 1);
+                                scheduleItem
+                                        .setDayOfWeek(Integer.parseInt(cellSplitItem.split(",")[0].split(" ")[1]) - 1);
                             }
                             // Set lesson
                             LessonItem lessonItem = new LessonItem();
@@ -230,8 +238,7 @@ public class Account {
                                             Integer.parseInt(dateSplitted[2]),
                                             Integer.parseInt(dateSplitted[1]),
                                             Integer.parseInt(dateSplitted[0]),
-                                            0, 0, 0
-                                    );
+                                            0, 0, 0);
                                 } catch (Exception ex) {
                                     ex.printStackTrace();
                                 }
@@ -260,7 +267,12 @@ public class Account {
         return result;
     }
 
-    public static ArrayList<SubjectFeeItem> getSubjectFee(String sessionId, Integer year, Integer semester) throws Exception {
+    public static ArrayList<SubjectFeeItem> getSubjectFee(String sessionId, Integer year, Integer semester)
+            throws Exception {
+        if (!isLoggedIn(sessionId)) {
+            throw new Exception("No account logged in this session. May be you haven't logged in?");
+        }
+
         String url;
         switch (semester) {
             case 1:
@@ -274,15 +286,14 @@ public class Account {
                 throw new Exception("Invalid semester!");
         }
 
-
         CustomResponse response = CustomRequest.get(
                 sessionIdToCookie(sessionId),
                 url,
-                60
-        );
+                60);
 
         if (response.getReturnCode() < 200 || response.getReturnCode() >= 300)
-            throw new Exception("Server was return with code " + response.getReturnCode() + ". May be you haven't logged in?");
+            throw new Exception(
+                    "Server was return with code " + response.getReturnCode() + ". May be you haven't logged in?");
 
         Document webData = Jsoup.parse(response.getContentHtmlString());
 
@@ -324,62 +335,159 @@ public class Account {
     }
 
     public static AccountInformation getAccountInformation(String sessionId) throws Exception {
+        if (!isLoggedIn(sessionId)) {
+            throw new Exception("No account logged in this session. May be you haven't logged in?");
+        }
+
         CustomResponse response = CustomRequest.get(
                 sessionIdToCookie(sessionId),
                 Variables.URL_ACCOUNTINFORMATION,
-                60
-        );
+                60);
 
         if (response.getReturnCode() < 200 || response.getReturnCode() >= 300)
-            throw new Exception("Server was return with code " + response.getReturnCode() + ". May be you haven't logged in?");
+            throw new Exception(
+                    "Server was return with code " + response.getReturnCode() + ". May be you haven't logged in?");
 
         Document webData = Jsoup.parse(response.getContentHtmlString());
-        AccountInformation result = new AccountInformation();
-
-        result.setName(extFunc.getValueByID(webData, "CN_txtHoTen"));
-        result.setDateOfBirth(extFunc.getValueByID(webData, "CN_txtNgaySinh"));
-        result.setBirthPlace(extFunc.getValueFromComboBoxByID(webData, "CN_cboNoiSinh"));
-        result.setGender(extFunc.getValueByID(webData, "CN_txtGioiTinh"));
-        result.setEthnicity(extFunc.getValueFromComboBoxByID(webData, "CN_cboDanToc"));
-        result.setNationality(extFunc.getValueFromComboBoxByID(webData, "CN_cboQuocTich"));
-        result.setNationalIdCard(extFunc.getValueByID(webData, "CN_txtSoCMND"));
-        result.setNationalIdCardIssueDate(extFunc.getValueByID(webData, "CN_txtNgayCap"));
-        result.setNationalIdCardIssuePlace(extFunc.getValueFromComboBoxByID(webData, "CN_cboNoiCap"));
-        result.setCitizenIdCard(extFunc.getValueByID(webData, "CN_txtSoCCCD"));
-        result.setCitizenIdCardIssueDate(extFunc.getValueByID(webData, "CN_txtNcCCCD"));
-        result.setReligion(extFunc.getValueFromComboBoxByID(webData, "CN_cboTonGiao"));
-        result.setAccountBankId(extFunc.getValueByID(webData, "CN_txtTKNHang"));
-        result.setAccountBankName(extFunc.getValueByID(webData, "CN_txtNgHang"));
-        result.setHIId(extFunc.getValueByID(webData, "CN_txtSoBHYT"));
-        result.setHIExpireDate(extFunc.getValueByID(webData, "CN_txtHanBHYT"));
-        result.setSpecialization(extFunc.getValueByID(webData, "MainContent_CN_txtNganh"));
-        result.setSchoolClass(extFunc.getValueByID(webData, "CN_txtLop"));
-        result.setTrainingProgramPlan(extFunc.getValueByID(webData, "MainContent_CN_txtCTDT"));
-        result.setTrainingProgramPlan2(extFunc.getValueByID(webData, "MainContent_CN_txtCT2"));
-        result.setSchoolEmail(extFunc.getValueByID(webData, "CN_txtMail1"));
-        result.setPersonalEmail(extFunc.getValueByID(webData, "CN_txtMail2"));
-        result.setSchoolEmailInitPass(extFunc.getValueByID(webData, "CN_txtMK365"));
-        result.setFacebookUrl(extFunc.getValueByID(webData, "CN_txtFace"));
-        result.setPhoneNumber(extFunc.getValueByID(webData, "CN_txtPhone"));
-        result.setAddress(extFunc.getValueByID(webData, "CN_txtCuTru"));
-        result.setAddressFrom(extFunc.getValueFromComboBoxByID(webData, "CN_cboDCCua"));
-        result.setAddressCity(extFunc.getValueFromComboBoxByID(webData, "CN_cboTinhCTru"));
-        result.setAddressDistrict(extFunc.getValueFromComboBoxByID(webData, "CN_cboQuanCTru"));
-        result.setAddressSubDistrict(extFunc.getValueFromComboBoxByID(webData, "CN_divPhuongCTru"));
+        AccountInformation result = new AccountInformation(
+                extFunc.getValueByID(webData, "CN_txtHoTen"),
+                extFunc.getValueByID(webData, "CN_txtNgaySinh"),
+                extFunc.getValueFromComboBoxByID(webData, "CN_cboNoiSinh"),
+                extFunc.getValueByID(webData, "CN_txtGioiTinh"),
+                extFunc.getValueFromComboBoxByID(webData, "CN_cboDanToc"),
+                extFunc.getValueFromComboBoxByID(webData, "CN_cboQuocTich"),
+                extFunc.getValueByID(webData, "CN_txtSoCMND"),
+                extFunc.getValueByID(webData, "CN_txtNgayCap"),
+                extFunc.getValueFromComboBoxByID(webData, "CN_cboNoiCap"),
+                extFunc.getValueByID(webData, "CN_txtSoCCCD"),
+                extFunc.getValueByID(webData, "CN_txtNcCCCD"),
+                extFunc.getValueFromComboBoxByID(webData, "CN_cboTonGiao"),
+                extFunc.getValueByID(webData, "CN_txtTKNHang"),
+                extFunc.getValueByID(webData, "CN_txtNgHang"),
+                extFunc.getValueByID(webData, "CN_txtSoBHYT"),
+                extFunc.getValueByID(webData, "CN_txtHanBHYT"),
+                extFunc.getValueByID(webData, "MainContent_CN_txtNganh"),
+                extFunc.getValueByID(webData, "CN_txtLop"),
+                extFunc.getValueByID(webData, "MainContent_CN_txtCTDT"),
+                extFunc.getValueByID(webData, "MainContent_CN_txtCT2"),
+                extFunc.getValueByID(webData, "CN_txtMail1"),
+                extFunc.getValueByID(webData, "CN_txtMail2"),
+                extFunc.getValueByID(webData, "CN_txtMK365"),
+                extFunc.getValueByID(webData, "CN_txtFace"),
+                extFunc.getValueByID(webData, "CN_txtPhone"),
+                extFunc.getValueByID(webData, "CN_txtCuTru"),
+                extFunc.getValueFromComboBoxByID(webData, "CN_cboDCCua"),
+                extFunc.getValueFromComboBoxByID(webData, "CN_cboTinhCTru"),
+                extFunc.getValueFromComboBoxByID(webData, "CN_cboQuanCTru"),
+                extFunc.getValueFromComboBoxByID(webData, "CN_divPhuongCTru"),
+                "");
 
         Element element = webData.getElementById("Main_lblHoTen");
         if (element != null) {
             String temp = element.text();
             result.setStudentId(temp.substring(temp.indexOf("(") + 1, temp.indexOf(")")));
-        }
-        else result.setStudentId("");
+        } else
+            result.setStudentId("");
 
         return result;
     }
 
-    interface SessionExternalFunction {
-        @Nullable String getValueByID(Document webData, String elementId);
+    public static AccountTrainingStatus getAccountTrainingStatus(String sessionId) throws Exception {
+        if (!isLoggedIn(sessionId)) {
+            throw new Exception("No account logged in this session. May be you haven't logged in?");
+        }
 
-        @Nullable String getValueFromComboBoxByID(Document webData, String elementId);
+        CustomResponse response = CustomRequest.get(
+                sessionIdToCookie(sessionId),
+                Variables.URL_ACCOUNTTRAININGSTATUS,
+                60);
+        if (response.getReturnCode() < 200 || response.getReturnCode() >= 300)
+            throw new Exception(
+                    "Server was return with code " + response.getReturnCode() + ". May be you haven't logged in?");
+
+        Document webData = Jsoup.parse(response.getContentHtmlString());
+        AccountTrainingStatus result = new AccountTrainingStatus();
+
+        // Training status
+        TrainingSummary trainSum = new TrainingSummary();
+        Elements accTrainingStatus = webData.getElementById("KQRLGridTH").getElementsByClass("GridRow");
+        for (Element data : accTrainingStatus) {
+            Elements cellData = data.getElementsByClass("GridCell");
+            if (cellData.get(0).text().isEmpty() || cellData.get(cellData.size() - 1).text().isEmpty()
+                    || cellData.get(cellData.size() - 2).text().isEmpty()
+                    || cellData.get(cellData.size() - 3).text().isEmpty())
+                continue;
+
+            Boolean first = false;
+            if (trainSum.getSchoolYearStart() == null) {
+                first = true;
+            } else if (trainSum.getSchoolYearStart().isEmpty() || trainSum.getSchoolYearStart().isBlank()) {
+                first = true;
+            }
+
+            if (first) {
+                trainSum.setSchoolYearStart(cellData.get(0).text());
+                ;
+            }
+            trainSum.setSchoolYearCurrent(cellData.get(0).text());
+            trainSum.setCreditCollected(Double.parseDouble(cellData.get(cellData.size() - 3).text()));
+            trainSum.setAvgTrainingScore4(Double.parseDouble(cellData.get(cellData.size() - 2).text()));
+            trainSum.setAvgSocial(Double.parseDouble(cellData.get(cellData.size() - 1).text()));
+        }
+        result.setTrainingSummary(trainSum);
+
+        // Graduate status
+        Element accGraduateStatus = webData.getElementById("KQRLdvCc");
+        GraduateStatus graduateStatus = new GraduateStatus(
+                accGraduateStatus.getElementById("KQRL_chkGDTC").hasAttr("checked"),
+                accGraduateStatus.getElementById("KQRL_chkQP").hasAttr("checked"),
+                accGraduateStatus.getElementById("KQRL_chkCCNN").hasAttr("checked"),
+                accGraduateStatus.getElementById("KQRL_chkCCTH").hasAttr("checked"),
+                accGraduateStatus.getElementById("KQRL_chkCNTN").hasAttr("checked"),
+                accGraduateStatus.getElementById("KQRL_txtKT").text(),
+                accGraduateStatus.getElementById("KQRL_txtKL").text(),
+                accGraduateStatus.getElementById("KQRL_txtInfo").text(),
+                accGraduateStatus.getElementById("KQRL_txtCNTN").text());
+        result.setGraduateStatus(graduateStatus);
+
+        // Subject Result list
+        ArrayList<SubjectResult> accSubjectResult = new ArrayList<>();
+        Elements accSubjectResultList = webData.getElementById("KQRL_divContent").getElementById("KQRLGridKQHT")
+                .getElementsByClass("GridRow");
+        for (int i = accSubjectResultList.size() - 1; i >= 0; i--) {
+            Elements cellList = accSubjectResultList.get(i).getElementsByClass("GridCell");
+            SubjectResult item = new SubjectResult(
+                    Integer.parseInt(cellList.get(0).text()),
+                    cellList.get(1).text(),
+                    cellList.get(2).hasClass("GridCheck"),
+                    cellList.get(3).text(),
+                    cellList.get(4).text(),
+                    Double.parseDouble(cellList.get(5).text()),
+                    cellList.get(6).text().isEmpty() ? null : cellList.get(6).text(),
+                    cellList.get(7).text().isEmpty() ? null : Double.parseDouble(cellList.get(7).text()),
+                    cellList.get(8).text().isEmpty() ? null : Double.parseDouble(cellList.get(8).text()),
+                    cellList.get(9).text().isEmpty() ? null : Double.parseDouble(cellList.get(9).text()),
+                    cellList.get(10).text().isEmpty() ? null : Double.parseDouble(cellList.get(10).text()),
+                    cellList.get(11).text().isEmpty() ? null : Double.parseDouble(cellList.get(11).text()),
+                    cellList.get(12).text().isEmpty() ? null : Double.parseDouble(cellList.get(12).text()),
+                    cellList.get(13).text().isEmpty() ? null : Double.parseDouble(cellList.get(13).text()),
+                    cellList.get(14).text().isEmpty() ? null : Double.parseDouble(cellList.get(14).text()),
+                    cellList.get(15).text().isEmpty() ? null : Double.parseDouble(cellList.get(15).text()),
+                    cellList.get(16).text(),
+                    accSubjectResult.stream().anyMatch(p -> p.getName() == cellList.get(4).text()));
+
+            accSubjectResult.add(item);
+        }
+        result.setSubjectResultList(accSubjectResult);
+
+        return result;
+    }
+
+    interface WebDocumentUtils {
+        @Nullable
+        String getValueByID(Document webData, String elementId);
+
+        @Nullable
+        String getValueFromComboBoxByID(Document webData, String elementId);
     }
 }

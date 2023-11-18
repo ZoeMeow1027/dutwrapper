@@ -10,6 +10,8 @@ public class Variables {
     public final static String URL_SUBJECTSCHEDULE = "http://sv.dut.udn.vn/WebAjax/evLopHP_Load.aspx?E=TTKBLoad&Code=%d%d%d";
     public final static String URL_SUBJECTFEE = "http://sv.dut.udn.vn/WebAjax/evLopHP_Load.aspx?E=THPhiLoad&Code=%d%d%d";
     public final static String URL_ACCOUNTINFORMATION = "http://sv.dut.udn.vn/PageCaNhan.aspx";
+    public final static String URL_ACCOUNTTRAININGSTATUS = "http://sv.dut.udn.vn/PageKQRL.aspx";
+    public final static String URL_SCHOOLCURRENTWEEK = "http://dut.udn.vn/Lichtuan";
 
     public final static String __VIEWSTATE = "/wEPDwUKMTY2NjQ1OTEyNA8WAh4TVmFsaWRhdGVSZXF1ZXN0TW9kZQIBFgJmD2QWAgIFDxYCHglpbm5lcmh0bWwF/iw8dWwgaWQ" +
             "9J21lbnUnIHN0eWxlPSd3aWR0aDogMTAyNHB4OyBtYXJnaW46IDAgYXV0bzsgJz48bGk+PGEgSUQ9ICdsUGFIT01FJyBzdHlsZS" +
@@ -94,6 +96,4 @@ public class Variables {
     public final static String __VIEWSTATEGENERATOR = "20CC0D2F";
 
     public final static String QLTH_btnLogin = "Đăng+nhập";
-
-    public final static String DUT_WEEK_JSON = "{\"gmt\":0,\"unix\":\"milliseconds\",\"list\":[{\"name\":\"2016-2017\",\"year\":16,\"start\":1470589200000},{\"name\":\"2017-2018\",\"year\":17,\"start\":1502038800000},{\"name\":\"2018-2019\",\"year\":18,\"start\":1533488400000},{\"name\":\"2019-2020\",\"year\":19,\"start\":1564938000000},{\"name\":\"2020-2021\",\"year\":20,\"start\":1596387600000},{\"name\":\"2021-2022\",\"year\":21,\"start\":1627837200000},{\"name\":\"2022-2023\",\"year\":22,\"start\":1659286800000}]}";
 }

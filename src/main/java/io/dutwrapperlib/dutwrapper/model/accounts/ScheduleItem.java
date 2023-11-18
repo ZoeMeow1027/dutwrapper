@@ -1,4 +1,4 @@
-package io.dutwrapperlib.dutwrapper.objects.accounts;
+package io.dutwrapperlib.dutwrapper.model.accounts;
 
 import java.io.Serializable;
 
@@ -40,6 +40,5 @@ public class ScheduleItem implements Serializable {
     public void setRoom(String room) {
         this.room = room;
     }
-
 
 }

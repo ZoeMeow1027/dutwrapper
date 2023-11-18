@@ -1,9 +1,9 @@
-package io.dutwrapperlib.dutwrapper.objects.news;
+package io.dutwrapperlib.dutwrapper.model.news;
 
 import java.util.ArrayList;
 
-import io.dutwrapperlib.dutwrapper.objects.accounts.LessonItem;
-import io.dutwrapperlib.dutwrapper.objects.enums.LessonStatus;
+import io.dutwrapperlib.dutwrapper.model.accounts.LessonItem;
+import io.dutwrapperlib.dutwrapper.model.enums.LessonStatus;
 
 public class NewsSubjectItem extends NewsGlobalItem {
     private ArrayList<NewsSubjectAffectedItem> affectedClass = new ArrayList<>();

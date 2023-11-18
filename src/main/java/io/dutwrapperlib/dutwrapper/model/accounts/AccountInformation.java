@@ -1,4 +1,4 @@
-package io.dutwrapperlib.dutwrapper.objects.accounts;
+package io.dutwrapperlib.dutwrapper.model.accounts;
 
 import java.io.Serializable;
 
@@ -37,6 +37,46 @@ public class AccountInformation implements Serializable {
 
     public AccountInformation() {
 
+    }
+
+    public AccountInformation(String name, String dateOfBirth, String birthPlace, String gender, String ethnicity,
+            String nationality, String nationalIdCard, String nationalIdCardIssueDate, String nationalIdCardIssuePlace,
+            String citizenIdCard, String citizenIdCardIssueDate, String religion, String accountBankId,
+            String accountBankName, String hIId, String hIExpireDate, String specialization, String schoolClass,
+            String trainingProgramPlan, String trainingProgramPlan2, String schoolEmail, String personalEmail,
+            String schoolEmailInitPass, String facebookUrl, String phoneNumber, String address, String addressFrom,
+            String addressCity, String addressDistrict, String addressSubDistrict, String studentId) {
+        this.name = name;
+        this.dateOfBirth = dateOfBirth;
+        this.birthPlace = birthPlace;
+        this.gender = gender;
+        this.ethnicity = ethnicity;
+        this.nationality = nationality;
+        this.nationalIdCard = nationalIdCard;
+        this.nationalIdCardIssueDate = nationalIdCardIssueDate;
+        this.nationalIdCardIssuePlace = nationalIdCardIssuePlace;
+        this.citizenIdCard = citizenIdCard;
+        this.citizenIdCardIssueDate = citizenIdCardIssueDate;
+        this.religion = religion;
+        this.accountBankId = accountBankId;
+        this.accountBankName = accountBankName;
+        this.hIId = hIId;
+        this.hIExpireDate = hIExpireDate;
+        this.specialization = specialization;
+        this.schoolClass = schoolClass;
+        this.trainingProgramPlan = trainingProgramPlan;
+        this.trainingProgramPlan2 = trainingProgramPlan2;
+        this.schoolEmail = schoolEmail;
+        this.personalEmail = personalEmail;
+        this.schoolEmailInitPass = schoolEmailInitPass;
+        this.facebookUrl = facebookUrl;
+        this.phoneNumber = phoneNumber;
+        this.address = address;
+        this.addressFrom = addressFrom;
+        this.addressCity = addressCity;
+        this.addressDistrict = addressDistrict;
+        this.addressSubDistrict = addressSubDistrict;
+        this.studentId = studentId;
     }
 
     public String getName() {

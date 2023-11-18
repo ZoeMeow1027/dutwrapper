@@ -1,4 +1,4 @@
-package io.dutwrapperlib.dutwrapper.objects.accounts;
+package io.dutwrapperlib.dutwrapper.model.accounts;
 
 import java.io.Serializable;
 import java.util.Objects;
@@ -82,7 +82,8 @@ public class SubjectCodeItem implements Serializable {
     public String toString(Boolean twoLastDigit) {
         if (twoLastDigit)
             return String.format("%02d.%s", studentYearId, classId);
-        else return String.format("%02d.%02d.%s.%s", subjectId, schoolYearId, studentYearId, classId);
+        else
+            return String.format("%02d.%02d.%s.%s", subjectId, schoolYearId, studentYearId, classId);
     }
 
     public Boolean equalsTwoDigits(SubjectCodeItem codeItem) {

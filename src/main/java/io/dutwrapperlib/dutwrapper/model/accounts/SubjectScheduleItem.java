@@ -1,4 +1,4 @@
-package io.dutwrapperlib.dutwrapper.objects.accounts;
+package io.dutwrapperlib.dutwrapper.model.accounts;
 
 import java.io.Serializable;
 
@@ -17,7 +17,7 @@ public class SubjectScheduleItem implements Serializable {
     }
 
     public SubjectScheduleItem(SubjectCodeItem id, String name, Integer credit, Boolean isHighQuality,
-                               ScheduleStudy subjectStudy, ScheduleExam subjectExam) {
+            ScheduleStudy subjectStudy, ScheduleExam subjectExam) {
         this.id = id;
         this.name = name;
         this.credit = credit;

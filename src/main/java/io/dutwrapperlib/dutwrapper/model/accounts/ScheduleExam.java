@@ -1,4 +1,4 @@
-package io.dutwrapperlib.dutwrapper.objects.accounts;
+package io.dutwrapperlib.dutwrapper.model.accounts;
 
 import java.io.Serializable;
 

@@ -2,8 +2,8 @@ package io.dutwrapperlib.dutwrapper;
 
 import org.junit.jupiter.api.Test;
 
-import io.dutwrapperlib.dutwrapper.objects.enums.LessonStatus;
-import io.dutwrapperlib.dutwrapper.objects.news.NewsSubjectItem;
+import io.dutwrapperlib.dutwrapper.model.enums.LessonStatus;
+import io.dutwrapperlib.dutwrapper.model.news.NewsSubjectItem;
 
 import java.util.List;
 
@@ -24,19 +24,18 @@ public class NewsSubjectTest {
                 System.out.println("============================");
                 System.out.println(newsItem.getTitle());
                 System.out.println(newsItem.getDate());
-                System.out.printf("%s|%s%n", newsItem.getLecturerName(), newsItem.getLecturerGender() ? "true" : "false");
+                System.out.printf("%s|%s%n", newsItem.getLecturerName(),
+                        newsItem.getLecturerGender() ? "true" : "false");
                 if (newsItem.getLessonStatus() == LessonStatus.Leaving) {
                     System.out.println("Leaving");
                     System.out.println("Date: " + newsItem.getAffectedDate());
                     System.out.println("Lesson: " + newsItem.getAffectedLesson().toString());
-                }
-                else if (newsItem.getLessonStatus() == LessonStatus.MakeUp) {
+                } else if (newsItem.getLessonStatus() == LessonStatus.MakeUp) {
                     System.out.println("MakeUp");
                     System.out.println("Date: " + newsItem.getAffectedDate());
                     System.out.println("Lesson: " + newsItem.getAffectedLesson().toString());
                     System.out.println("Room: " + newsItem.getAffectedRoom());
-                }
-                else {
+                } else {
                     System.out.println(newsItem.getContentString());
                 }
             }

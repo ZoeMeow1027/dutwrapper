@@ -7,14 +7,14 @@ import org.jsoup.select.Elements;
 
 import io.dutwrapperlib.dutwrapper.customrequest.CustomRequest;
 import io.dutwrapperlib.dutwrapper.customrequest.CustomResponse;
-import io.dutwrapperlib.dutwrapper.objects.accounts.LessonItem;
-import io.dutwrapperlib.dutwrapper.objects.accounts.SubjectCodeItem;
-import io.dutwrapperlib.dutwrapper.objects.enums.LessonStatus;
-import io.dutwrapperlib.dutwrapper.objects.enums.NewsType;
-import io.dutwrapperlib.dutwrapper.objects.news.LinkItem;
-import io.dutwrapperlib.dutwrapper.objects.news.NewsGlobalItem;
-import io.dutwrapperlib.dutwrapper.objects.news.NewsSubjectAffectedItem;
-import io.dutwrapperlib.dutwrapper.objects.news.NewsSubjectItem;
+import io.dutwrapperlib.dutwrapper.model.accounts.LessonItem;
+import io.dutwrapperlib.dutwrapper.model.accounts.SubjectCodeItem;
+import io.dutwrapperlib.dutwrapper.model.enums.LessonStatus;
+import io.dutwrapperlib.dutwrapper.model.enums.NewsType;
+import io.dutwrapperlib.dutwrapper.model.news.LinkItem;
+import io.dutwrapperlib.dutwrapper.model.news.NewsGlobalItem;
+import io.dutwrapperlib.dutwrapper.model.news.NewsSubjectAffectedItem;
+import io.dutwrapperlib.dutwrapper.model.news.NewsSubjectItem;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;

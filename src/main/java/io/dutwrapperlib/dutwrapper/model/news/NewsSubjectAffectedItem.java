@@ -1,9 +1,9 @@
-package io.dutwrapperlib.dutwrapper.objects.news;
+package io.dutwrapperlib.dutwrapper.model.news;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 
-import io.dutwrapperlib.dutwrapper.objects.accounts.SubjectCodeItem;
+import io.dutwrapperlib.dutwrapper.model.accounts.SubjectCodeItem;
 
 public class NewsSubjectAffectedItem implements Serializable {
     private ArrayList<SubjectCodeItem> codeList = new ArrayList<>();

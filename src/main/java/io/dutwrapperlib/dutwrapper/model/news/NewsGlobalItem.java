@@ -1,4 +1,4 @@
-package io.dutwrapperlib.dutwrapper.objects.news;
+package io.dutwrapperlib.dutwrapper.model.news;
 
 import java.io.Serializable;
 import java.util.ArrayList;

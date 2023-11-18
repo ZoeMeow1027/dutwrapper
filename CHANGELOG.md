@@ -1,6 +1,11 @@
 # DUTWRAPPER CHANGE LOG - JAVA
 
-This file will list all version log for modified, add or remove function of dutapi.
+This file will list all version log for modified, add or remove function of dutwrapper.
+
+## 1.8.0
+- Changed package name to io.dutwrapper.dutwrapper.
+- Added getAccountTrainingStatus() from Account class.
+- Removed DutScheduleWeek in Utils, which is replaced by getCurrentSchoolWeek().
 
 ## 1.7.5
 - Changed package name to io.dutwrapperlib.dutwrapper. Get package in JitPack still is io.dutwrapper-lib.java.

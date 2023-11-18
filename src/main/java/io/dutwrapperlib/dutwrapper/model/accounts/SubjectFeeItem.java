@@ -1,4 +1,4 @@
-package io.dutwrapperlib.dutwrapper.objects.accounts;
+package io.dutwrapperlib.dutwrapper.model.accounts;
 
 import java.io.Serializable;
 
@@ -16,8 +16,9 @@ public class SubjectFeeItem implements Serializable {
 
     }
 
-    public SubjectFeeItem(SubjectCodeItem id, String name, Integer credit, Boolean isHighQuality, Double price, Boolean debt,
-                          Boolean isRestudy, String verifiedPaymentAt) {
+    public SubjectFeeItem(SubjectCodeItem id, String name, Integer credit, Boolean isHighQuality, Double price,
+            Boolean debt,
+            Boolean isRestudy, String verifiedPaymentAt) {
         this.id = id;
         this.name = name;
         this.credit = credit;

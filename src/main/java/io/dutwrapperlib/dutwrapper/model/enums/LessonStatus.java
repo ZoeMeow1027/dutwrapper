@@ -1,4 +1,4 @@
-package io.dutwrapperlib.dutwrapper.objects.enums;
+package io.dutwrapperlib.dutwrapper.model.enums;
 
 public enum LessonStatus {
     Unknown,
