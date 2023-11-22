@@ -421,7 +421,7 @@ public class Account {
             Boolean first = false;
             if (trainSum.getSchoolYearStart() == null) {
                 first = true;
-            } else if (trainSum.getSchoolYearStart().isEmpty() || trainSum.getSchoolYearStart().isBlank()) {
+            } else if (trainSum.getSchoolYearStart().isEmpty()) {
                 first = true;
             }
 
