@@ -10,12 +10,14 @@ import io.dutwrapper.dutwrapper.customrequest.CustomResponse;
 import io.dutwrapper.dutwrapper.model.accounts.LessonItem;
 import io.dutwrapper.dutwrapper.model.accounts.SubjectCodeItem;
 import io.dutwrapper.dutwrapper.model.enums.LessonStatus;
+import io.dutwrapper.dutwrapper.model.enums.NewsSearchType;
 import io.dutwrapper.dutwrapper.model.enums.NewsType;
 import io.dutwrapper.dutwrapper.model.news.LinkItem;
 import io.dutwrapper.dutwrapper.model.news.NewsGlobalItem;
 import io.dutwrapper.dutwrapper.model.news.NewsSubjectAffectedItem;
 import io.dutwrapper.dutwrapper.model.news.NewsSubjectItem;
 
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -26,26 +28,30 @@ import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import javax.annotation.Nullable;
+
 @SuppressWarnings("SpellCheckingInspection")
 public class News {
-    private static ArrayList<NewsGlobalItem> getNews(NewsType newsType, Integer page) throws Exception {
-        String url = "";
-
-        switch (newsType) {
-            case Global:
-                url = String.format(Variables.URL_NEWS, "CTRTBSV", page);
-                break;
-            case Subject:
-                url = String.format(Variables.URL_NEWS, "CTRTBGV", page);
-                break;
-        }
+    public static ArrayList<NewsGlobalItem> getNews(
+        @Nullable NewsType newsType,
+        @Nullable Integer page,
+        @Nullable NewsSearchType searchType,
+        @Nullable String searchQuery
+    ) throws Exception {
+        String url = String.format(
+            Variables.URL_NEWS,
+            newsType == null ? NewsType.Global.toString() : newsType.toString(),
+            page == null ? 1 : page,
+            searchType == null ? NewsSearchType.ByTitle.toString() : searchType.toString(),
+            URLEncoder.encode(searchQuery == null ? "" : searchQuery, StandardCharsets.UTF_8.toString())
+        );
 
         CustomResponse response = CustomRequest.get(null, url, 60);
-        if (response.getReturnCode() < 200 || response.getReturnCode() >= 300)
+        if (response.getReturnCode() < 200 || response.getReturnCode() >= 300) {
             throw new Exception("Server was returned with code " + response.getReturnCode() + ".");
+        }
 
         // https://www.baeldung.com/java-with-jsoup
-
         Document webData = Jsoup.parse(response.getContentHtmlString());
         webData.outputSettings().charset(StandardCharsets.UTF_8);
         for (Element el : webData.getElementsByTag("br")) {
@@ -105,13 +111,31 @@ public class News {
         return newsList;
     }
 
-    public static ArrayList<NewsGlobalItem> getNewsGlobal(Integer page) throws Exception {
-        return getNews(NewsType.Global, page);
+    public static ArrayList<NewsGlobalItem> getNewsGlobal(
+        @Nullable Integer page,
+        @Nullable NewsSearchType searchType,
+        @Nullable String searchQuery
+    ) throws Exception {
+        return getNews(
+            NewsType.Global,
+            page == null ? 1 : page,
+            searchType,
+            searchQuery
+        );
     }
 
-    public static ArrayList<NewsSubjectItem> getNewsSubject(Integer page) throws Exception {
+    public static ArrayList<NewsSubjectItem> getNewsSubject(
+        @Nullable Integer page,
+        @Nullable NewsSearchType searchType,
+        @Nullable String searchQuery
+    ) throws Exception {
         ArrayList<NewsSubjectItem> result = new ArrayList<>();
-        ArrayList<NewsGlobalItem> listTemp = getNews(NewsType.Subject, page);
+        ArrayList<NewsGlobalItem> listTemp = getNews(
+            NewsType.Subject,
+            page == null ? 1 : page,
+            searchType,
+            searchQuery
+        );
 
         for (NewsGlobalItem item : listTemp) {
             NewsSubjectItem subjectItem = new NewsSubjectItem();

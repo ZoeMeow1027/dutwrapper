@@ -1,4 +1,4 @@
-package io.dutwrapperlib.dutwrapper;
+package io.dutwrapper.dutwrapper;
 
 import org.junit.jupiter.api.Test;
 

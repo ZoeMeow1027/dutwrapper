@@ -1,9 +1,9 @@
-package io.dutwrapperlib.dutwrapper;
+package io.dutwrapper.dutwrapper;
 
 import org.junit.jupiter.api.Test;
 
-import io.dutwrapper.dutwrapper.News;
 import io.dutwrapper.dutwrapper.model.enums.LessonStatus;
+import io.dutwrapper.dutwrapper.model.enums.NewsSearchType;
 import io.dutwrapper.dutwrapper.model.news.NewsSubjectItem;
 
 import java.util.List;
@@ -18,7 +18,7 @@ public class NewsSubjectTest {
             System.out.println("==================================");
             System.out.println("Page " + page);
 
-            List<NewsSubjectItem> newsList = News.getNewsSubject(page);
+            List<NewsSubjectItem> newsList = News.getNewsSubject(page, NewsSearchType.ByContent, "Thứ");
             System.out.println("Item count: " + newsList.size());
 
             for (NewsSubjectItem newsItem : newsList) {
