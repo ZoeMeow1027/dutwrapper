@@ -2,8 +2,12 @@
 
 This file will list all version log for modified, add or remove function of dutwrapper.
 
+## 1.8.1
+- Solved a mistake in SubjectResult constructor.
+- Updated dependencies to latest version.
+
 ## 1.8.0
-- Changed package name to io.dutwrapper.dutwrapper.
+- Changed package name and folder structure to io.dutwrapper.dutwrapper.
 - Added getAccountTrainingStatus() from Account class.
 - Removed DutScheduleWeek in Utils, which is replaced by getCurrentSchoolWeek().
 
