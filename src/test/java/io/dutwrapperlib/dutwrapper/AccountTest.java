@@ -2,11 +2,12 @@ package io.dutwrapperlib.dutwrapper;
 
 import org.junit.jupiter.api.Test;
 
-import io.dutwrapperlib.dutwrapper.customrequest.CustomResponse;
-import io.dutwrapperlib.dutwrapper.model.accounts.AccountInformation;
-import io.dutwrapperlib.dutwrapper.model.accounts.SubjectFeeItem;
-import io.dutwrapperlib.dutwrapper.model.accounts.SubjectScheduleItem;
-import io.dutwrapperlib.dutwrapper.model.accounts.trainingresult.AccountTrainingStatus;
+import io.dutwrapper.dutwrapper.Account;
+import io.dutwrapper.dutwrapper.customrequest.CustomResponse;
+import io.dutwrapper.dutwrapper.model.accounts.AccountInformation;
+import io.dutwrapper.dutwrapper.model.accounts.SubjectFeeItem;
+import io.dutwrapper.dutwrapper.model.accounts.SubjectScheduleItem;
+import io.dutwrapper.dutwrapper.model.accounts.trainingresult.AccountTrainingStatus;
 
 import java.io.IOException;
 import java.util.ArrayList;

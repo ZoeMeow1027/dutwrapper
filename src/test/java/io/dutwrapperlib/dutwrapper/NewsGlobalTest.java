@@ -2,8 +2,9 @@ package io.dutwrapperlib.dutwrapper;
 
 import org.junit.jupiter.api.Test;
 
-import io.dutwrapperlib.dutwrapper.model.news.LinkItem;
-import io.dutwrapperlib.dutwrapper.model.news.NewsGlobalItem;
+import io.dutwrapper.dutwrapper.News;
+import io.dutwrapper.dutwrapper.model.news.LinkItem;
+import io.dutwrapper.dutwrapper.model.news.NewsGlobalItem;
 
 import java.util.List;
 
