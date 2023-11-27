@@ -2,10 +2,6 @@
 
 This library provides wrapper (for this repository - crawl data from a page) for access for some features in [DUT Student page - Da Nang University of Technology](http://sv.dut.udn.vn).
 
-## Versions
-
-1.7.5
-
 ## Building requirements
 
 - JDK (tested with Eclipse Temurin JDK with Hotspot v17.0.2 and v8).
