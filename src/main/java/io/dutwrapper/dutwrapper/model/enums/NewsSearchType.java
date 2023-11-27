@@ -1,11 +1,11 @@
 package io.dutwrapper.dutwrapper.model.enums;
 
-public enum NewsType {
-    Global("CTRTBSV"),
-    Subject("CTRTBGV");
+public enum NewsSearchType {
+    ByTitle("TieuDe"),
+    ByContent("NoiDung");
 
     private String value;
-    private NewsType(String s) {
+    private NewsSearchType(String s) {
         this.value = s;
     }
 

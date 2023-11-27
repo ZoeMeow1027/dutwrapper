@@ -1,8 +1,8 @@
-package io.dutwrapperlib.dutwrapper;
+package io.dutwrapper.dutwrapper;
 
 import org.junit.jupiter.api.Test;
 
-import io.dutwrapper.dutwrapper.News;
+import io.dutwrapper.dutwrapper.model.enums.NewsSearchType;
 import io.dutwrapper.dutwrapper.model.news.LinkItem;
 import io.dutwrapper.dutwrapper.model.news.NewsGlobalItem;
 
@@ -16,7 +16,7 @@ class NewsGlobalTest {
 
         while (page <= pageMax) {
             System.out.println("===========================================");
-            List<NewsGlobalItem> newsList = News.getNewsGlobal(page);
+            List<NewsGlobalItem> newsList = News.getNewsGlobal(page, NewsSearchType.ByContent, "Thứ");
             System.out.println(String.format("Page %d (%d item(s))", page, newsList.size()));
 
             for (NewsGlobalItem newsItem : newsList) {

@@ -2,7 +2,7 @@ package io.dutwrapper.dutwrapper;
 
 @SuppressWarnings("SpellCheckingInspection")
 public class Variables {
-    public final static String URL_NEWS = "http://sv.dut.udn.vn/WebAjax/evLopHP_Load.aspx?E=%s&PAGETB=%d&COL=TieuDe&NAME=&TAB=0";
+    public final static String URL_NEWS = "http://sv.dut.udn.vn/WebAjax/evLopHP_Load.aspx?E=%s&PAGETB=%d&COL=%s&NAME=%s&TAB=0";
     public final static String URL_MAINPAGE = "http://sv.dut.udn.vn/";
     public final static String URL_LOGIN = "http://sv.dut.udn.vn/PageDangNhap.aspx";
     public final static String URL_CHECKLOGGEDIN = "http://sv.dut.udn.vn/WebAjax/evLopHP_Load.aspx?E=TTKBLoad&Code=2110";
