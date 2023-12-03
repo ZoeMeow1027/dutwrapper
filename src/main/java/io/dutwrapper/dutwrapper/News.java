@@ -13,8 +13,10 @@ import io.dutwrapper.dutwrapper.model.enums.LessonStatus;
 import io.dutwrapper.dutwrapper.model.enums.NewsSearchType;
 import io.dutwrapper.dutwrapper.model.enums.NewsType;
 import io.dutwrapper.dutwrapper.model.news.LinkItem;
+import io.dutwrapper.dutwrapper.model.news.NewsGlobalGroupByDate;
 import io.dutwrapper.dutwrapper.model.news.NewsGlobalItem;
 import io.dutwrapper.dutwrapper.model.news.NewsSubjectAffectedItem;
+import io.dutwrapper.dutwrapper.model.news.NewsSubjectGroupByDate;
 import io.dutwrapper.dutwrapper.model.news.NewsSubjectItem;
 
 import java.net.URLEncoder;
@@ -33,18 +35,16 @@ import javax.annotation.Nullable;
 @SuppressWarnings("SpellCheckingInspection")
 public class News {
     public static ArrayList<NewsGlobalItem> getNews(
-        @Nullable NewsType newsType,
-        @Nullable Integer page,
-        @Nullable NewsSearchType searchType,
-        @Nullable String searchQuery
-    ) throws Exception {
+            @Nullable NewsType newsType,
+            @Nullable Integer page,
+            @Nullable NewsSearchType searchType,
+            @Nullable String searchQuery) throws Exception {
         String url = String.format(
-            Variables.URL_NEWS,
-            newsType == null ? NewsType.Global.toString() : newsType.toString(),
-            page == null ? 1 : page,
-            searchType == null ? NewsSearchType.ByTitle.toString() : searchType.toString(),
-            URLEncoder.encode(searchQuery == null ? "" : searchQuery, StandardCharsets.UTF_8.toString())
-        );
+                Variables.URL_NEWS,
+                newsType == null ? NewsType.Global.toString() : newsType.toString(),
+                page == null ? 1 : page,
+                searchType == null ? NewsSearchType.ByTitle.toString() : searchType.toString(),
+                URLEncoder.encode(searchQuery == null ? "" : searchQuery, StandardCharsets.UTF_8.toString()));
 
         CustomResponse response = CustomRequest.get(null, url, 60);
         if (response.getReturnCode() < 200 || response.getReturnCode() >= 300) {
@@ -76,7 +76,8 @@ public class News {
                 LocalDateTime dateTime = date.atTime(time);
                 newsItem.setDate(dateTime.atZone(ZoneOffset.UTC).toInstant().toEpochMilli());
                 newsItem.setTitle(titleTemp[1].trim());
-            } else newsItem.setTitle(title.text().trim());
+            } else
+                newsItem.setTitle(title.text().trim());
 
             newsItem.setContent(content.html());
             newsItem.setContentString(content.wholeText());
@@ -92,8 +93,7 @@ public class News {
                     LinkItem item1 = new LinkItem(
                             item.wholeText(),
                             item.attr("abs:href"),
-                            position
-                    );
+                            position);
                     links.add(item1);
                     position += item.wholeText().length();
 
@@ -112,30 +112,26 @@ public class News {
     }
 
     public static ArrayList<NewsGlobalItem> getNewsGlobal(
-        @Nullable Integer page,
-        @Nullable NewsSearchType searchType,
-        @Nullable String searchQuery
-    ) throws Exception {
+            @Nullable Integer page,
+            @Nullable NewsSearchType searchType,
+            @Nullable String searchQuery) throws Exception {
         return getNews(
-            NewsType.Global,
-            page == null ? 1 : page,
-            searchType,
-            searchQuery
-        );
+                NewsType.Global,
+                page == null ? 1 : page,
+                searchType,
+                searchQuery);
     }
 
     public static ArrayList<NewsSubjectItem> getNewsSubject(
-        @Nullable Integer page,
-        @Nullable NewsSearchType searchType,
-        @Nullable String searchQuery
-    ) throws Exception {
+            @Nullable Integer page,
+            @Nullable NewsSearchType searchType,
+            @Nullable String searchQuery) throws Exception {
         ArrayList<NewsSubjectItem> result = new ArrayList<>();
         ArrayList<NewsGlobalItem> listTemp = getNews(
-            NewsType.Subject,
-            page == null ? 1 : page,
-            searchType,
-            searchQuery
-        );
+                NewsType.Subject,
+                page == null ? 1 : page,
+                searchType,
+                searchQuery);
 
         for (NewsGlobalItem item : listTemp) {
             NewsSubjectItem subjectItem = new NewsSubjectItem();
@@ -163,24 +159,30 @@ public class News {
             if (subjectItem.getContent().contains("HỌC BÙ")) {
                 subjectItem.setLessonStatus(LessonStatus.MakeUp);
                 subjectItem.setAffectedDate(Utils.date2UnixTimestamp(
-                        Utils.findFirstString(subjectItem.getContentString(), "\\d{2}[-|/]\\d{2}[-|/]\\d{4}")
-                ));
+                        Utils.findFirstString(subjectItem.getContentString(), "\\d{2}[-|/]\\d{2}[-|/]\\d{4}")));
                 try {
                     subjectItem.setAffectedLesson(getLessonItem(
-                            Objects.requireNonNull(Utils.findFirstString(subjectItem.getContentString().toLowerCase(), "tiết: .*[0-9],")).replace("tiết:", "").replace(",", "").trim()
-                    ));
-                } catch (Exception ignored) { }
+                            Objects.requireNonNull(Utils.findFirstString(subjectItem.getContentString().toLowerCase(),
+                                    "tiết: .*[0-9],")).replace("tiết:", "").replace(",", "").trim()));
+                } catch (Exception ignored) {
+                }
                 try {
-                    subjectItem.setAffectedRoom(Objects.requireNonNull(Utils.findFirstString(subjectItem.getContentString().toLowerCase(), "phòng:.*")).replace("phòng:", "").replace(",", "").trim().toUpperCase());
-                } catch (Exception ignored) { }
+                    subjectItem.setAffectedRoom(Objects
+                            .requireNonNull(
+                                    Utils.findFirstString(subjectItem.getContentString().toLowerCase(), "phòng:.*"))
+                            .replace("phòng:", "").replace(",", "").trim().toUpperCase());
+                } catch (Exception ignored) {
+                }
             } else if (subjectItem.getContent().contains("NGHỈ HỌC")) {
                 subjectItem.setLessonStatus(LessonStatus.Leaving);
-                subjectItem.setAffectedDate(Utils.date2UnixTimestamp(Utils.findFirstString(subjectItem.getContentString(), "\\d{2}[-|/]\\d{2}[-|/]\\d{4}")));
+                subjectItem.setAffectedDate(Utils.date2UnixTimestamp(
+                        Utils.findFirstString(subjectItem.getContentString(), "\\d{2}[-|/]\\d{2}[-|/]\\d{4}")));
                 try {
                     subjectItem.setAffectedLesson(getLessonItem(
-                            Objects.requireNonNull(Utils.findFirstString(subjectItem.getContentString().toLowerCase(), "\\(tiết:.*[0-9]\\)")).replace("(tiết:", "").replace(")", "").trim()
-                    ));
-                } catch (Exception ignored) { }
+                            Objects.requireNonNull(Utils.findFirstString(subjectItem.getContentString().toLowerCase(),
+                                    "\\(tiết:.*[0-9]\\)")).replace("(tiết:", "").replace(")", "").trim()));
+                } catch (Exception ignored) {
+                }
             } else {
                 subjectItem.setLessonStatus(LessonStatus.Unknown);
             }
@@ -198,31 +200,30 @@ public class News {
             item.setStart(Integer.parseInt(input.split("-")[0]));
             item.setEnd(Integer.parseInt(input.split("-")[1]));
             return item;
-        }
-        else return null;
+        } else
+            return null;
     }
 
     private static ArrayList<NewsSubjectAffectedItem> getAffectedClass(String input) {
         String subjectProcessing = input.split(" thông báo đến lớp:")[1].trim();
-        ArrayList<String> data1 = Arrays.stream(subjectProcessing.split(" , ")).collect(Collectors.toCollection(ArrayList::new));
+        ArrayList<String> data1 = Arrays.stream(subjectProcessing.split(" , "))
+                .collect(Collectors.toCollection(ArrayList::new));
         ArrayList<NewsSubjectAffectedItem> data2 = new ArrayList<>();
 
-        for (String item: data1) {
+        for (String item : data1) {
             String itemSubjectName = item.substring(0, item.indexOf("[")).trim();
             String itemClass = item.substring(item.indexOf("[") + 1, item.indexOf("]")).toLowerCase();
             SubjectCodeItem codeItem;
             if (itemClass.contains(".nh")) {
                 String[] data = itemClass.split(".nh");
                 codeItem = new SubjectCodeItem(
-                    data[0],
-                    data[1]
-                );
+                        data[0],
+                        data[1]);
             } else {
                 String[] data = itemClass.split("nh");
                 codeItem = new SubjectCodeItem(
-                    data[0],
-                    data[1]
-                );
+                        data[0],
+                        data[1]);
             }
 
             if (data2.stream().noneMatch(p -> Objects.equals(p.getSubjectName(), itemSubjectName))) {
@@ -230,9 +231,9 @@ public class News {
                 item2.setSubjectName(itemSubjectName);
                 item2.getCodeList().add(codeItem);
                 data2.add(item2);
-            }
-            else {
-                Optional<NewsSubjectAffectedItem> tempdata = data2.stream().filter(p -> Objects.equals(p.getSubjectName(), itemSubjectName)).findFirst();
+            } else {
+                Optional<NewsSubjectAffectedItem> tempdata = data2.stream()
+                        .filter(p -> Objects.equals(p.getSubjectName(), itemSubjectName)).findFirst();
                 if (tempdata.isPresent()) {
                     NewsSubjectAffectedItem temp = tempdata.get();
                     temp.getCodeList().add(codeItem);
@@ -241,5 +242,51 @@ public class News {
         }
 
         return data2;
+    }
+
+    public static ArrayList<NewsGlobalGroupByDate> getNewsGlobalGroupByDate(
+            @Nullable Integer page,
+            @Nullable NewsSearchType searchType,
+            @Nullable String searchQuery) throws Exception {
+        ArrayList<NewsGlobalGroupByDate> _result = new ArrayList<>();
+        ArrayList<NewsGlobalItem> _temp = getNewsGlobal(page, searchType, searchQuery);
+
+        for (NewsGlobalItem item : _temp) {
+            if (_result.stream().anyMatch(p -> p.getDateInUnixTimeMilliseconds() == item.getDate())) {
+                // if date group exist
+                _result.stream().filter(p -> p.getDateInUnixTimeMilliseconds() == item.getDate()).findFirst().get()
+                        .addData(item, null);
+            } else {
+                // if not
+                NewsGlobalGroupByDate group = new NewsGlobalGroupByDate(item.getDate());
+                group.addData(item, null);
+                _result.add(group);
+            }
+        }
+
+        return _result;
+    }
+
+    public static ArrayList<NewsSubjectGroupByDate> getNewsSubjectGroupByDate(
+            @Nullable Integer page,
+            @Nullable NewsSearchType searchType,
+            @Nullable String searchQuery) throws Exception {
+        ArrayList<NewsSubjectGroupByDate> _result = new ArrayList<>();
+        ArrayList<NewsSubjectItem> _temp = getNewsSubject(page, searchType, searchQuery);
+
+        for (NewsSubjectItem item : _temp) {
+            if (_result.stream().anyMatch(p -> p.getDateInUnixTimeMilliseconds() == item.getDate())) {
+                // if date group exist
+                _result.stream().filter(p -> p.getDateInUnixTimeMilliseconds() == item.getDate()).findFirst().get()
+                        .addData(item, null);
+            } else {
+                // if not
+                NewsSubjectGroupByDate group = new NewsSubjectGroupByDate(item.getDate());
+                group.addData(item, null);
+                _result.add(group);
+            }
+        }
+
+        return _result;
     }
 }

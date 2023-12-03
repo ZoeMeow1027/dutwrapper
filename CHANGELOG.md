@@ -2,6 +2,12 @@
 
 This file will list all version log for modified, add or remove function of dutwrapper.
 
+## 1.8.2
+- Add a option for get news to group by date. You can manually access them by two function in News class:
+  - getNewsGlobalGroupByDate
+  - getNewsSubjectGroupByDate
+- Merge two news test into once.
+
 ## 1.8.1
 - Solved a mistake in SubjectResult constructor.
 - Updated dependencies to latest version.
