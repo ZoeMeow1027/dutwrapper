@@ -31,10 +31,26 @@ class AccountTest {
 
     static void getSubjectSchedule(String sessionId, Integer year, Integer semester) throws Exception {
         ArrayList<SubjectScheduleItem> subjectScheduleList = Account.getSubjectSchedule(sessionId, year, semester);
+        for (SubjectScheduleItem subjectScheduleItem: subjectScheduleList) {
+            System.out.println(String.format(
+                "Subject #%d\nName: %s\nID: %s\n========================",
+                subjectScheduleList.indexOf(subjectScheduleItem),
+                subjectScheduleItem.getName(),
+                subjectScheduleItem.getId()
+            ));
+        }
     }
 
     static void getSubjectFee(String sessionId, Integer year, Integer semester) throws Exception {
         ArrayList<SubjectFeeItem> subjectFeeList = Account.getSubjectFee(sessionId, year, semester);
+        for (SubjectFeeItem subjectFeeItem: subjectFeeList) {
+            System.out.println(String.format(
+                "Subject #%d\nName: %s\nID: %s\n========================",
+                subjectFeeList.indexOf(subjectFeeItem),
+                subjectFeeItem.getName(),
+                subjectFeeItem.getId()
+            ));
+        }
     }
 
     static void getAccountInformation(String sessionId) throws Exception {

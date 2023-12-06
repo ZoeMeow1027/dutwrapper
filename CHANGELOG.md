@@ -2,6 +2,10 @@
 
 This file will list all version log for modified, add or remove function of dutwrapper.
 
+## 1.8.3
+- Fixed a issue cause news sorted by descending in get news group by date.
+- Fixed a issue cause subject code item throw a exception about string format.
+
 ## 1.8.2
 - Add a option for get news to group by date. You can manually access them by two function in News class:
   - getNewsGlobalGroupByDate

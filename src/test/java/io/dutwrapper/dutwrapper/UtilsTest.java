@@ -2,8 +2,6 @@ package io.dutwrapper.dutwrapper;
 
 import org.junit.jupiter.api.Test;
 
-import io.dutwrapper.dutwrapper.Utils;
-
 public class UtilsTest {
     @Test
     void finalTest() throws Exception {

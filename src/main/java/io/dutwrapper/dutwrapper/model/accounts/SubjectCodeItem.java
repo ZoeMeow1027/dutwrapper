@@ -81,7 +81,7 @@ public class SubjectCodeItem implements Serializable {
 
     public String toString(Boolean twoLastDigit) {
         if (twoLastDigit)
-            return String.format("%02d.%s", studentYearId, classId);
+            return String.format("%s.%s", studentYearId, classId);
         else
             return String.format("%02d.%02d.%s.%s", subjectId, schoolYearId, studentYearId, classId);
     }

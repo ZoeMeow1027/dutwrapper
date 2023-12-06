@@ -255,11 +255,11 @@ public class News {
             if (_result.stream().anyMatch(p -> p.getDateInUnixTimeMilliseconds() == item.getDate())) {
                 // if date group exist
                 _result.stream().filter(p -> p.getDateInUnixTimeMilliseconds() == item.getDate()).findFirst().get()
-                        .addData(item, null);
+                        .addData(item);
             } else {
                 // if not
                 NewsGlobalGroupByDate group = new NewsGlobalGroupByDate(item.getDate());
-                group.addData(item, null);
+                group.addData(item);
                 _result.add(group);
             }
         }
@@ -278,11 +278,11 @@ public class News {
             if (_result.stream().anyMatch(p -> p.getDateInUnixTimeMilliseconds() == item.getDate())) {
                 // if date group exist
                 _result.stream().filter(p -> p.getDateInUnixTimeMilliseconds() == item.getDate()).findFirst().get()
-                        .addData(item, null);
+                        .addData(item);
             } else {
                 // if not
                 NewsSubjectGroupByDate group = new NewsSubjectGroupByDate(item.getDate());
-                group.addData(item, null);
+                group.addData(item);
                 _result.add(group);
             }
         }

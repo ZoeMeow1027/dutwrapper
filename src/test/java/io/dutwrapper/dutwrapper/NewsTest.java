@@ -52,13 +52,21 @@ class NewsTest {
             ArrayList<NewsGlobalGroupByDate> newsList = News.getNewsGlobalGroupByDate(page, null, null);
             System.out.println(String.format("Page %d (%d item(s))", page, newsList.size()));
 
-            for (NewsGlobalGroupByDate newsItem : newsList) {
+            for (NewsGlobalGroupByDate newsGroup : newsList) {
                 System.out.println(String.format(
                     "Index %d - date: %d - count: %d",
-                    newsList.indexOf(newsItem) + 1,
-                    newsItem.getDateInUnixTimeMilliseconds(),
-                    newsItem.getData().size()
+                    newsList.indexOf(newsGroup) + 1,
+                    newsGroup.getDateInUnixTimeMilliseconds(),
+                    newsGroup.getData().size()
                     ));
+                for (NewsGlobalItem newsItem: newsGroup.getData()) {
+                    System.out.println(String.format(
+                        "- Index %d - date: %d - title: %s",
+                        newsGroup.getData().indexOf(newsItem),
+                        newsItem.getDate(),
+                        newsItem.getTitle()
+                    ));
+                }
             }
             page += 1;
         }
@@ -109,13 +117,21 @@ class NewsTest {
             ArrayList<NewsSubjectGroupByDate> newsList = News.getNewsSubjectGroupByDate(page, null, null);
             System.out.println(String.format("Page %d (%d item(s))", page, newsList.size()));
 
-            for (NewsSubjectGroupByDate newsItem : newsList) {
+            for (NewsSubjectGroupByDate newsGroup : newsList) {
                 System.out.println(String.format(
                     "Index %d - date: %d - count: %d",
-                    newsList.indexOf(newsItem) + 1,
-                    newsItem.getDateInUnixTimeMilliseconds(),
-                    newsItem.getData().size()
+                    newsList.indexOf(newsGroup) + 1,
+                    newsGroup.getDateInUnixTimeMilliseconds(),
+                    newsGroup.getData().size()
                     ));
+                for (NewsSubjectItem newsItem: newsGroup.getData()) {
+                    System.out.println(String.format(
+                        "- Index %d - date: %d - title: %s",
+                        newsGroup.getData().indexOf(newsItem),
+                        newsItem.getDate(),
+                        newsItem.getTitle()
+                    ));
+                }
             }
             page += 1;
         }
