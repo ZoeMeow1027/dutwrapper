@@ -5,9 +5,8 @@ import org.junit.jupiter.api.Test;
 import io.dutwrapper.dutwrapper.model.enums.LessonStatus;
 import io.dutwrapper.dutwrapper.model.enums.NewsSearchType;
 import io.dutwrapper.dutwrapper.model.news.LinkItem;
-import io.dutwrapper.dutwrapper.model.news.NewsGlobalGroupByDate;
 import io.dutwrapper.dutwrapper.model.news.NewsGlobalItem;
-import io.dutwrapper.dutwrapper.model.news.NewsSubjectGroupByDate;
+import io.dutwrapper.dutwrapper.model.news.NewsGroupByDate;
 import io.dutwrapper.dutwrapper.model.news.NewsSubjectItem;
 
 import java.util.ArrayList;
@@ -49,14 +48,14 @@ class NewsTest {
 
         while (page <= pageMax) {
             System.out.println("===========================================");
-            ArrayList<NewsGlobalGroupByDate> newsList = News.getNewsGlobalGroupByDate(page, null, null);
+            ArrayList<NewsGroupByDate<NewsGlobalItem>> newsList = News.getNewsGlobalGroupByDate(page, null, null);
             System.out.println(String.format("Page %d (%d item(s))", page, newsList.size()));
 
-            for (NewsGlobalGroupByDate newsGroup : newsList) {
+            for (NewsGroupByDate<NewsGlobalItem> newsGroup : newsList) {
                 System.out.println(String.format(
                     "Index %d - date: %d - count: %d",
                     newsList.indexOf(newsGroup) + 1,
-                    newsGroup.getDateInUnixTimeMilliseconds(),
+                    newsGroup.getDateInUnixMilliseconds(),
                     newsGroup.getData().size()
                     ));
                 for (NewsGlobalItem newsItem: newsGroup.getData()) {
@@ -114,14 +113,14 @@ class NewsTest {
 
         while (page <= pageMax) {
             System.out.println("===========================================");
-            ArrayList<NewsSubjectGroupByDate> newsList = News.getNewsSubjectGroupByDate(page, null, null);
+            ArrayList<NewsGroupByDate<NewsSubjectItem>> newsList = News.getNewsSubjectGroupByDate(page, null, null);
             System.out.println(String.format("Page %d (%d item(s))", page, newsList.size()));
 
-            for (NewsSubjectGroupByDate newsGroup : newsList) {
+            for (NewsGroupByDate<NewsSubjectItem> newsGroup : newsList) {
                 System.out.println(String.format(
                     "Index %d - date: %d - count: %d",
                     newsList.indexOf(newsGroup) + 1,
-                    newsGroup.getDateInUnixTimeMilliseconds(),
+                    newsGroup.getDateInUnixMilliseconds(),
                     newsGroup.getData().size()
                     ));
                 for (NewsSubjectItem newsItem: newsGroup.getData()) {

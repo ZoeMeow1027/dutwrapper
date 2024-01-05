@@ -2,6 +2,8 @@ package io.dutwrapper.dutwrapper;
 
 import org.junit.jupiter.api.Test;
 
+import com.google.gson.Gson;
+
 import io.dutwrapper.dutwrapper.customrequest.CustomResponse;
 import io.dutwrapper.dutwrapper.model.accounts.AccountInformation;
 import io.dutwrapper.dutwrapper.model.accounts.SubjectFeeItem;
@@ -55,10 +57,12 @@ class AccountTest {
 
     static void getAccountInformation(String sessionId) throws Exception {
         AccountInformation accInfo = Account.getAccountInformation(sessionId);
+        System.out.println(new Gson().toJson(accInfo));
     }
 
     static void getAccountTrainingStatus(String sessionId) throws Exception {
         AccountTrainingStatus accountTrainingStatus = Account.getAccountTrainingStatus(sessionId);
+        System.out.println(new Gson().toJson(accountTrainingStatus));
     }
 
     static void logout(String sessionId) throws Exception {
