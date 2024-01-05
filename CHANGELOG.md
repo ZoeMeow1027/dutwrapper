@@ -2,6 +2,10 @@
 
 This file will list all version log for modified, add or remove function of dutwrapper.
 
+## 1.8.4
+- Update dependencies to latest.
+- `NewsGroupByDate` is now interface. Use `NewsGlobalGroupByDate` and `NewsSubjectGroupByDate` for initializing group.
+
 ## 1.8.3
 - Fixed a issue cause news sorted by descending in get news group by date.
 - Fixed a issue cause subject code item throw a exception about string format.

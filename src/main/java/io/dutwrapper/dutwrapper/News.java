@@ -15,6 +15,7 @@ import io.dutwrapper.dutwrapper.model.enums.NewsType;
 import io.dutwrapper.dutwrapper.model.news.LinkItem;
 import io.dutwrapper.dutwrapper.model.news.NewsGlobalGroupByDate;
 import io.dutwrapper.dutwrapper.model.news.NewsGlobalItem;
+import io.dutwrapper.dutwrapper.model.news.NewsGroupByDate;
 import io.dutwrapper.dutwrapper.model.news.NewsSubjectAffectedItem;
 import io.dutwrapper.dutwrapper.model.news.NewsSubjectGroupByDate;
 import io.dutwrapper.dutwrapper.model.news.NewsSubjectItem;
@@ -45,6 +46,8 @@ public class News {
                 page == null ? 1 : page,
                 searchType == null ? NewsSearchType.ByTitle.toString() : searchType.toString(),
                 URLEncoder.encode(searchQuery == null ? "" : searchQuery, StandardCharsets.UTF_8.toString()));
+
+        // System.out.println(url);
 
         CustomResponse response = CustomRequest.get(null, url, 60);
         if (response.getReturnCode() < 200 || response.getReturnCode() >= 300) {
@@ -244,21 +247,21 @@ public class News {
         return data2;
     }
 
-    public static ArrayList<NewsGlobalGroupByDate> getNewsGlobalGroupByDate(
+    public static ArrayList<NewsGroupByDate<NewsGlobalItem>> getNewsGlobalGroupByDate(
             @Nullable Integer page,
             @Nullable NewsSearchType searchType,
             @Nullable String searchQuery) throws Exception {
-        ArrayList<NewsGlobalGroupByDate> _result = new ArrayList<>();
+        ArrayList<NewsGroupByDate<NewsGlobalItem>> _result = new ArrayList<>();
         ArrayList<NewsGlobalItem> _temp = getNewsGlobal(page, searchType, searchQuery);
 
         for (NewsGlobalItem item : _temp) {
-            if (_result.stream().anyMatch(p -> p.getDateInUnixTimeMilliseconds() == item.getDate())) {
+            if (_result.stream().anyMatch(p -> p.getDateInUnixMilliseconds() == item.getDate())) {
                 // if date group exist
-                _result.stream().filter(p -> p.getDateInUnixTimeMilliseconds() == item.getDate()).findFirst().get()
+                _result.stream().filter(p -> p.getDateInUnixMilliseconds() == item.getDate()).findFirst().get()
                         .addData(item);
             } else {
                 // if not
-                NewsGlobalGroupByDate group = new NewsGlobalGroupByDate(item.getDate());
+                NewsGroupByDate<NewsGlobalItem> group = new NewsGlobalGroupByDate(item.getDate());
                 group.addData(item);
                 _result.add(group);
             }
@@ -267,21 +270,21 @@ public class News {
         return _result;
     }
 
-    public static ArrayList<NewsSubjectGroupByDate> getNewsSubjectGroupByDate(
+    public static ArrayList<NewsGroupByDate<NewsSubjectItem>> getNewsSubjectGroupByDate(
             @Nullable Integer page,
             @Nullable NewsSearchType searchType,
             @Nullable String searchQuery) throws Exception {
-        ArrayList<NewsSubjectGroupByDate> _result = new ArrayList<>();
+        ArrayList<NewsGroupByDate<NewsSubjectItem>> _result = new ArrayList<>();
         ArrayList<NewsSubjectItem> _temp = getNewsSubject(page, searchType, searchQuery);
 
         for (NewsSubjectItem item : _temp) {
-            if (_result.stream().anyMatch(p -> p.getDateInUnixTimeMilliseconds() == item.getDate())) {
+            if (_result.stream().anyMatch(p -> p.getDateInUnixMilliseconds() == item.getDate())) {
                 // if date group exist
-                _result.stream().filter(p -> p.getDateInUnixTimeMilliseconds() == item.getDate()).findFirst().get()
+                _result.stream().filter(p -> p.getDateInUnixMilliseconds() == item.getDate()).findFirst().get()
                         .addData(item);
             } else {
                 // if not
-                NewsSubjectGroupByDate group = new NewsSubjectGroupByDate(item.getDate());
+                NewsGroupByDate<NewsSubjectItem> group = new NewsSubjectGroupByDate(item.getDate());
                 group.addData(item);
                 _result.add(group);
             }

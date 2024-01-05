@@ -16,17 +16,19 @@ This library provides wrapper (for this repository - crawl data from a page) for
 ## FAQ
 
 ### Branch in dutwrapper?
-- "main": Default branch and main release.
-- "draft": Alpha branch. This code isn't tested and use it at your own risk.
+- `stable`/`main`: Default branch and main release.
+- `draft`: Alpha branch. This branch is used for update my progress and it's very unstable. Use it at your own risk.
+
+### I received error about login while running AccountTest?
+- Did you mean this error: `dut_account environment variable not found. Please, add or modify this environment in format "username|password"`?
+- If so, you will need to add environment variable named `dut_account` with syntax `studentid|password`.
 
 ### Wiki, or manual for how-to-use?
 - In a plan, please be patient.
 
 ### Latest change log?
-
 - To view log for all versions, [click here](CHANGELOG.md).
 
 ## Copyright?
-
 - This project - dutwrapper - is not affiliated with [Da Nang University of Technology](http://sv.dut.udn.vn).
 - DUT, Da Nang University of Technology, web materials and web contents are trademarks and copyrights of [Da Nang University of Technology](http://sv.dut.udn.vn) school.
