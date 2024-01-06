@@ -5,8 +5,8 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import io.dutwrapper.dutwrapper.customrequest.CustomRequest;
-import io.dutwrapper.dutwrapper.customrequest.CustomResponse;
+import io.dutwrapper.dutwrapper.customrequest2.WrapperRequest;
+import io.dutwrapper.dutwrapper.customrequest2.WrapperResponse;
 import io.dutwrapper.dutwrapper.model.accounts.LessonItem;
 import io.dutwrapper.dutwrapper.model.accounts.SubjectCodeItem;
 import io.dutwrapper.dutwrapper.model.enums.LessonStatus;
@@ -47,15 +47,21 @@ public class News {
                 searchType == null ? NewsSearchType.ByTitle.toString() : searchType.toString(),
                 URLEncoder.encode(searchQuery == null ? "" : searchQuery, StandardCharsets.UTF_8.toString()));
 
-        // System.out.println(url);
+        WrapperResponse response = WrapperRequest.get(url, null, 60);
+        if (response.getException() != null) {
+            throw response.getException();
+        }
 
-        CustomResponse response = CustomRequest.get(null, url, 60);
-        if (response.getReturnCode() < 200 || response.getReturnCode() >= 300) {
-            throw new Exception("Server was returned with code " + response.getReturnCode() + ".");
+        if (response.getStatusCode() < 200 || response.getStatusCode() >= 300) {
+            throw new Exception("Server was returned with code " + response.getStatusCode() + ".");
         }
 
         // https://www.baeldung.com/java-with-jsoup
-        Document webData = Jsoup.parse(response.getContentHtmlString());
+        if (response.getContent() == null) {
+            return new ArrayList<>();
+        }
+
+        Document webData = Jsoup.parse(response.getContent());
         webData.outputSettings().charset(StandardCharsets.UTF_8);
         for (Element el : webData.getElementsByTag("br")) {
             el.remove();

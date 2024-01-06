@@ -5,10 +5,9 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import io.dutwrapper.dutwrapper.customrequest.CustomRequest;
-import io.dutwrapper.dutwrapper.customrequest.CustomRequestItem;
-import io.dutwrapper.dutwrapper.customrequest.CustomRequestList;
-import io.dutwrapper.dutwrapper.customrequest.CustomResponse;
+import io.dutwrapper.dutwrapper.customrequest2.WrapperRequest;
+import io.dutwrapper.dutwrapper.customrequest2.WrapperRequestHeader;
+import io.dutwrapper.dutwrapper.customrequest2.WrapperResponse;
 import io.dutwrapper.dutwrapper.model.accounts.*;
 import io.dutwrapper.dutwrapper.model.accounts.trainingresult.AccountTrainingStatus;
 import io.dutwrapper.dutwrapper.model.accounts.trainingresult.GraduateStatus;
@@ -23,6 +22,9 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 @SuppressWarnings({ "SpellCheckingInspection", "UnusedReturnValue" })
 public class Account {
@@ -52,8 +54,8 @@ public class Account {
         }
     };
 
-    public static CustomResponse getSessionId() throws IOException {
-        return CustomRequest.get(null, URL_MAINPAGE, 60);
+    public static WrapperResponse getSessionId() throws IOException {
+        return WrapperRequest.get(URL_MAINPAGE, null, 60);
     }
 
     private static String sessionIdToCookie(String sessionId) {
@@ -64,35 +66,47 @@ public class Account {
         return sb.toString();
     }
 
-    public static CustomResponse login(String sessionId, String user, String pass) throws IOException {
-        CustomRequestList requestList = new CustomRequestList();
-        requestList.addRequest(new CustomRequestItem("__VIEWSTATE", Variables.__VIEWSTATE));
-        requestList.addRequest(new CustomRequestItem("__VIEWSTATEGENERATOR", Variables.__VIEWSTATEGENERATOR));
-        requestList.addRequest(new CustomRequestItem("_ctl0:MainContent:DN_txtAcc", user));
-        requestList.addRequest(new CustomRequestItem("_ctl0:MainContent:DN_txtPass", pass));
-        requestList.addRequest(new CustomRequestItem("_ctl0:MainContent:QLTH_btnLogin", Variables.QLTH_btnLogin));
+    public static WrapperResponse login(String sessionId, String user, String pass) throws IOException {
+        Map<String, String> data = new HashMap<String, String>();
+        data.put("__VIEWSTATE", Variables.__VIEWSTATE);
+        data.put("__VIEWSTATEGENERATOR", Variables.__VIEWSTATEGENERATOR);
+        data.put("_ctl0:MainContent:DN_txtAcc", user);
+        data.put("_ctl0:MainContent:DN_txtPass", pass);
+        data.put("_ctl0:MainContent:QLTH_btnLogin", Variables.QLTH_btnLogin);
 
-        return CustomRequest.post(
-                sessionIdToCookie(sessionId),
+        ArrayList<WrapperRequestHeader> headers = new ArrayList<>(Arrays.asList(
+                new WrapperRequestHeader("Cookie", sessionIdToCookie(sessionId))));
+
+        return WrapperRequest.post(
                 Variables.URL_LOGIN,
-                requestList.toURLEncodeByteArray("UTF-8"),
+                Utils.toUrlEncode(data, "UTF-8"),
+                headers,
                 60);
     }
 
-    public static Boolean isLoggedIn(String sessionId) throws IOException {
-        CustomResponse response = CustomRequest.get(
-                sessionIdToCookie(sessionId),
+    public static Boolean isLoggedIn(String sessionId) throws Exception {
+        ArrayList<WrapperRequestHeader> headers = new ArrayList<>(Arrays.asList(
+                new WrapperRequestHeader("Cookie", sessionIdToCookie(sessionId))));
+
+        WrapperResponse response = WrapperRequest.get(
                 Variables.URL_CHECKLOGGEDIN,
+                headers,
                 60);
 
-        return response.getReturnCode() >= 200 && response.getReturnCode() < 300;
+        if (response.getException() != null) {
+            throw response.getException();
+        }
+
+        return response.getStatusCode() >= 200 && response.getStatusCode() < 300;
     }
 
-    public static CustomResponse logout(String sessionId) throws IOException {
-        return CustomRequest.get(
-                sessionIdToCookie(sessionId),
+    public static WrapperResponse logout(String sessionId) throws IOException {
+        ArrayList<WrapperRequestHeader> headers = new ArrayList<>(Arrays.asList(
+                new WrapperRequestHeader("Cookie", sessionIdToCookie(sessionId))));
+
+        return WrapperRequest.get(
                 Variables.URL_LOGOUT,
-                60);
+                headers, 60);
     }
 
     public static ArrayList<SubjectScheduleItem> getSubjectSchedule(String sessionId, Integer year, Integer semester)
@@ -114,16 +128,28 @@ public class Account {
                 throw new Exception("Invalid semester!");
         }
 
-        CustomResponse response = CustomRequest.get(
-                sessionIdToCookie(sessionId),
+        ArrayList<WrapperRequestHeader> headers = new ArrayList<>(Arrays.asList(
+                new WrapperRequestHeader("Cookie", sessionIdToCookie(sessionId))));
+        WrapperResponse response = WrapperRequest.get(
                 url,
+                headers,
                 60);
 
-        if (response.getReturnCode() < 200 || response.getReturnCode() >= 300)
-            throw new Exception(
-                    "Server was return with code " + response.getReturnCode() + ". May be you haven't logged in?");
+        if (response.getException() != null) {
+            throw response.getException();
+        }
 
-        Document webData = Jsoup.parse(response.getContentHtmlString());
+        if (response.getStatusCode() < 200 || response.getStatusCode() >= 300) {
+            throw new Exception(String.format(
+                    "Server was return with code %d. May be you haven't logged in?",
+                    response.getStatusCode()));
+        }
+
+        if (response.getContent() == null) {
+            return new ArrayList<>();
+        }
+
+        Document webData = Jsoup.parse(response.getContent());
 
         ArrayList<SubjectScheduleItem> result = new ArrayList<>();
 
@@ -286,16 +312,28 @@ public class Account {
                 throw new Exception("Invalid semester!");
         }
 
-        CustomResponse response = CustomRequest.get(
-                sessionIdToCookie(sessionId),
+        ArrayList<WrapperRequestHeader> headers = new ArrayList<>(Arrays.asList(
+                new WrapperRequestHeader("Cookie", sessionIdToCookie(sessionId))));
+        WrapperResponse response = WrapperRequest.get(
                 url,
+                headers,
                 60);
 
-        if (response.getReturnCode() < 200 || response.getReturnCode() >= 300)
-            throw new Exception(
-                    "Server was return with code " + response.getReturnCode() + ". May be you haven't logged in?");
+        if (response.getException() != null) {
+            throw response.getException();
+        }
 
-        Document webData = Jsoup.parse(response.getContentHtmlString());
+        if (response.getStatusCode() < 200 || response.getStatusCode() >= 300) {
+            throw new Exception(String.format(
+                    "Server was return with code %d. May be you haven't logged in?",
+                    response.getStatusCode()));
+        }
+
+        if (response.getContent() == null) {
+            return new ArrayList<>();
+        }
+
+        Document webData = Jsoup.parse(response.getContent());
 
         ArrayList<SubjectFeeItem> result = new ArrayList<>();
 
@@ -339,16 +377,28 @@ public class Account {
             throw new Exception("No account logged in this session. May be you haven't logged in?");
         }
 
-        CustomResponse response = CustomRequest.get(
-                sessionIdToCookie(sessionId),
+        ArrayList<WrapperRequestHeader> headers = new ArrayList<>(Arrays.asList(
+                new WrapperRequestHeader("Cookie", sessionIdToCookie(sessionId))));
+        WrapperResponse response = WrapperRequest.get(
                 Variables.URL_ACCOUNTINFORMATION,
+                headers,
                 60);
 
-        if (response.getReturnCode() < 200 || response.getReturnCode() >= 300)
-            throw new Exception(
-                    "Server was return with code " + response.getReturnCode() + ". May be you haven't logged in?");
+        if (response.getException() != null) {
+            throw response.getException();
+        }
 
-        Document webData = Jsoup.parse(response.getContentHtmlString());
+        if (response.getStatusCode() < 200 || response.getStatusCode() >= 300) {
+            throw new Exception(String.format(
+                    "Server was return with code %d. May be you haven't logged in?",
+                    response.getStatusCode()));
+        }
+
+        if (response.getContent() == null) {
+            throw new Exception("WrapperResponse was returned content is null");
+        }
+
+        Document webData = Jsoup.parse(response.getContent());
         AccountInformation result = new AccountInformation(
                 extFunc.getValueByID(webData, "CN_txtHoTen"),
                 extFunc.getValueByID(webData, "CN_txtNgaySinh"),
@@ -397,15 +447,28 @@ public class Account {
             throw new Exception("No account logged in this session. May be you haven't logged in?");
         }
 
-        CustomResponse response = CustomRequest.get(
-                sessionIdToCookie(sessionId),
+        ArrayList<WrapperRequestHeader> headers = new ArrayList<>(Arrays.asList(
+                new WrapperRequestHeader("Cookie", sessionIdToCookie(sessionId))));
+        WrapperResponse response = WrapperRequest.get(
                 Variables.URL_ACCOUNTTRAININGSTATUS,
+                headers,
                 60);
-        if (response.getReturnCode() < 200 || response.getReturnCode() >= 300)
-            throw new Exception(
-                    "Server was return with code " + response.getReturnCode() + ". May be you haven't logged in?");
 
-        Document webData = Jsoup.parse(response.getContentHtmlString());
+        if (response.getException() != null) {
+            throw response.getException();
+        }
+
+        if (response.getStatusCode() < 200 || response.getStatusCode() >= 300) {
+            throw new Exception(String.format(
+                    "Server was return with code %d. May be you haven't logged in?",
+                    response.getStatusCode()));
+        }
+
+        if (response.getContent() == null) {
+            throw new Exception("WrapperResponse was returned content is null");
+        }
+
+        Document webData = Jsoup.parse(response.getContent());
         AccountTrainingStatus result = new AccountTrainingStatus();
 
         // Training status
