@@ -75,6 +75,11 @@ class AccountTest {
     }
 
     @Test
+    void test1() throws Exception {
+        WrapperRequest.Response d1 = WrapperRequest.get(new WrapperRequest.RequestGet("http://sv.dut.udn.vn/", null, 60));
+    }
+
+    @Test
     void finalTest() throws Exception {
         String sessionId;
 
