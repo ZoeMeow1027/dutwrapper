@@ -5,9 +5,6 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import io.dutwrapper.dutwrapper.customrequest2.WrapperRequest;
-import io.dutwrapper.dutwrapper.customrequest2.WrapperRequestHeader;
-import io.dutwrapper.dutwrapper.customrequest2.WrapperResponse;
 import io.dutwrapper.dutwrapper.model.accounts.*;
 import io.dutwrapper.dutwrapper.model.accounts.trainingresult.AccountTrainingStatus;
 import io.dutwrapper.dutwrapper.model.accounts.trainingresult.GraduateStatus;
@@ -24,11 +21,28 @@ import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @SuppressWarnings({ "SpellCheckingInspection", "UnusedReturnValue" })
 public class Account {
-    private static final WebDocumentUtils extFunc = new WebDocumentUtils() {
+    interface AccountUtils {
+        @Nullable
+        String getValueByID(Document webData, String elementId);
+
+        @Nullable
+        String getValueFromComboBoxByID(Document webData, String elementId);
+
+        @Nullable
+        Integer cellToIntegerOrNull(Element element);
+
+        @Nullable
+        Double cellToDoubleOrNull(Element element);
+        
+        String sessionIdToCookie(String sessionId);
+    }
+
+    private static final AccountUtils utils = new AccountUtils() {
         public @Nullable String getValueByID(Document webData, String elementId) {
             Element element = webData.getElementById(elementId);
             if (element != null) {
@@ -52,21 +66,58 @@ public class Account {
 
             return result;
         }
+
+        @Override
+        public String sessionIdToCookie(String sessionId) {
+            StringBuilder sb = new StringBuilder();
+            if (sessionId != null) {
+                sb.append("ASP.NET_SessionId").append("=").append(sessionId).append(";");
+            }
+            return sb.toString();
+        }
+
+        @Override
+        @Nullable
+        public Double cellToDoubleOrNull(Element element) {
+            String data = element.text();
+            if (data.isEmpty()) {
+                return null;
+            }
+            try {
+                return Double.parseDouble(data);
+            } catch (Exception _) {
+                return null;
+            }
+        }
+
+        @Override
+        @Nullable
+        public Integer cellToIntegerOrNull(Element element) {
+            String data = element.text();
+            if (data.isEmpty()) {
+                return null;
+            }
+            try {
+                return Integer.parseInt(data);
+            } catch (Exception _) {
+                return null;
+            }        
+        }
     };
 
-    public static WrapperResponse getSessionId() throws IOException {
-        return WrapperRequest.get(URL_MAINPAGE, null, 60);
+    public static HttpClientWrapper.Response getSessionId() throws IOException {
+        return HttpClientWrapper.get(URL_MAINPAGE, null, 60);
     }
 
-    private static String sessionIdToCookie(String sessionId) {
-        StringBuilder sb = new StringBuilder();
-        if (sessionId != null) {
-            sb.append("ASP.NET_SessionId").append("=").append(sessionId).append(";");
+    public static HttpClientWrapper.Response login(String user, String pass) throws Exception {
+        HttpClientWrapper.Response sessionId = getSessionId();
+        if (sessionId.getSessionId() == null) {
+            throw new Exception("No session id found!");
         }
-        return sb.toString();
+        return login(sessionId.getSessionId(), user, pass);
     }
 
-    public static WrapperResponse login(String sessionId, String user, String pass) throws IOException {
+    public static HttpClientWrapper.Response login(String sessionId, String user, String pass) throws IOException {
         Map<String, String> data = new HashMap<String, String>();
         data.put("__VIEWSTATE", Variables.__VIEWSTATE);
         data.put("__VIEWSTATEGENERATOR", Variables.__VIEWSTATEGENERATOR);
@@ -74,10 +125,10 @@ public class Account {
         data.put("_ctl0:MainContent:DN_txtPass", pass);
         data.put("_ctl0:MainContent:QLTH_btnLogin", Variables.QLTH_btnLogin);
 
-        ArrayList<WrapperRequestHeader> headers = new ArrayList<>(Arrays.asList(
-                new WrapperRequestHeader("Cookie", sessionIdToCookie(sessionId))));
+        List<HttpClientWrapper.Header> headers = new ArrayList<>(Arrays.asList(
+                new HttpClientWrapper.Header("Cookie", utils.sessionIdToCookie(sessionId))));
 
-        return WrapperRequest.post(
+        return HttpClientWrapper.post(
                 Variables.URL_LOGIN,
                 Utils.toUrlEncode(data, "UTF-8"),
                 headers,
@@ -85,10 +136,10 @@ public class Account {
     }
 
     public static Boolean isLoggedIn(String sessionId) throws Exception {
-        ArrayList<WrapperRequestHeader> headers = new ArrayList<>(Arrays.asList(
-                new WrapperRequestHeader("Cookie", sessionIdToCookie(sessionId))));
+        List<HttpClientWrapper.Header> headers = new ArrayList<>(Arrays.asList(
+                new HttpClientWrapper.Header("Cookie", utils.sessionIdToCookie(sessionId))));
 
-        WrapperResponse response = WrapperRequest.get(
+        HttpClientWrapper.Response response = HttpClientWrapper.get(
                 Variables.URL_CHECKLOGGEDIN,
                 headers,
                 60);
@@ -100,11 +151,11 @@ public class Account {
         return response.getStatusCode() >= 200 && response.getStatusCode() < 300;
     }
 
-    public static WrapperResponse logout(String sessionId) throws IOException {
-        ArrayList<WrapperRequestHeader> headers = new ArrayList<>(Arrays.asList(
-                new WrapperRequestHeader("Cookie", sessionIdToCookie(sessionId))));
+    public static HttpClientWrapper.Response logout(String sessionId) throws IOException {
+        List<HttpClientWrapper.Header> headers = new ArrayList<>(Arrays.asList(
+                new HttpClientWrapper.Header("Cookie", utils.sessionIdToCookie(sessionId))));
 
-        return WrapperRequest.get(
+        return HttpClientWrapper.get(
                 Variables.URL_LOGOUT,
                 headers, 60);
     }
@@ -128,9 +179,9 @@ public class Account {
                 throw new Exception("Invalid semester!");
         }
 
-        ArrayList<WrapperRequestHeader> headers = new ArrayList<>(Arrays.asList(
-                new WrapperRequestHeader("Cookie", sessionIdToCookie(sessionId))));
-        WrapperResponse response = WrapperRequest.get(
+        List<HttpClientWrapper.Header> headers = new ArrayList<>(Arrays.asList(
+                new HttpClientWrapper.Header("Cookie", utils.sessionIdToCookie(sessionId))));
+        HttpClientWrapper.Response response = HttpClientWrapper.get(
                 url,
                 headers,
                 60);
@@ -312,9 +363,9 @@ public class Account {
                 throw new Exception("Invalid semester!");
         }
 
-        ArrayList<WrapperRequestHeader> headers = new ArrayList<>(Arrays.asList(
-                new WrapperRequestHeader("Cookie", sessionIdToCookie(sessionId))));
-        WrapperResponse response = WrapperRequest.get(
+        List<HttpClientWrapper.Header> headers = new ArrayList<>(Arrays.asList(
+                new HttpClientWrapper.Header("Cookie", utils.sessionIdToCookie(sessionId))));
+        HttpClientWrapper.Response response = HttpClientWrapper.get(
                 url,
                 headers,
                 60);
@@ -377,9 +428,9 @@ public class Account {
             throw new Exception("No account logged in this session. May be you haven't logged in?");
         }
 
-        ArrayList<WrapperRequestHeader> headers = new ArrayList<>(Arrays.asList(
-                new WrapperRequestHeader("Cookie", sessionIdToCookie(sessionId))));
-        WrapperResponse response = WrapperRequest.get(
+        ArrayList<HttpClientWrapper.Header> headers = new ArrayList<>(Arrays.asList(
+                new HttpClientWrapper.Header("Cookie", utils.sessionIdToCookie(sessionId))));
+        HttpClientWrapper.Response response = HttpClientWrapper.get(
                 Variables.URL_ACCOUNTINFORMATION,
                 headers,
                 60);
@@ -400,36 +451,36 @@ public class Account {
 
         Document webData = Jsoup.parse(response.getContent());
         AccountInformation result = new AccountInformation(
-                extFunc.getValueByID(webData, "CN_txtHoTen"),
-                extFunc.getValueByID(webData, "CN_txtNgaySinh"),
-                extFunc.getValueFromComboBoxByID(webData, "CN_cboNoiSinh"),
-                extFunc.getValueByID(webData, "CN_txtGioiTinh"),
-                extFunc.getValueFromComboBoxByID(webData, "CN_cboDanToc"),
-                extFunc.getValueFromComboBoxByID(webData, "CN_cboQuocTich"),
-                extFunc.getValueByID(webData, "CN_txtSoCMND"),
-                extFunc.getValueByID(webData, "CN_txtNgayCap"),
-                extFunc.getValueFromComboBoxByID(webData, "CN_cboNoiCap"),
-                extFunc.getValueByID(webData, "CN_txtSoCCCD"),
-                extFunc.getValueByID(webData, "CN_txtNcCCCD"),
-                extFunc.getValueFromComboBoxByID(webData, "CN_cboTonGiao"),
-                extFunc.getValueByID(webData, "CN_txtTKNHang"),
-                extFunc.getValueByID(webData, "CN_txtNgHang"),
-                extFunc.getValueByID(webData, "CN_txtSoBHYT"),
-                extFunc.getValueByID(webData, "CN_txtHanBHYT"),
-                extFunc.getValueByID(webData, "MainContent_CN_txtNganh"),
-                extFunc.getValueByID(webData, "CN_txtLop"),
-                extFunc.getValueByID(webData, "MainContent_CN_txtCTDT"),
-                extFunc.getValueByID(webData, "MainContent_CN_txtCT2"),
-                extFunc.getValueByID(webData, "CN_txtMail1"),
-                extFunc.getValueByID(webData, "CN_txtMail2"),
-                extFunc.getValueByID(webData, "CN_txtMK365"),
-                extFunc.getValueByID(webData, "CN_txtFace"),
-                extFunc.getValueByID(webData, "CN_txtPhone"),
-                extFunc.getValueByID(webData, "CN_txtCuTru"),
-                extFunc.getValueFromComboBoxByID(webData, "CN_cboDCCua"),
-                extFunc.getValueFromComboBoxByID(webData, "CN_cboTinhCTru"),
-                extFunc.getValueFromComboBoxByID(webData, "CN_cboQuanCTru"),
-                extFunc.getValueFromComboBoxByID(webData, "CN_divPhuongCTru"),
+                utils.getValueByID(webData, "CN_txtHoTen"),
+                utils.getValueByID(webData, "CN_txtNgaySinh"),
+                utils.getValueFromComboBoxByID(webData, "CN_cboNoiSinh"),
+                utils.getValueByID(webData, "CN_txtGioiTinh"),
+                utils.getValueFromComboBoxByID(webData, "CN_cboDanToc"),
+                utils.getValueFromComboBoxByID(webData, "CN_cboQuocTich"),
+                utils.getValueByID(webData, "CN_txtSoCMND"),
+                utils.getValueByID(webData, "CN_txtNgayCap"),
+                utils.getValueFromComboBoxByID(webData, "CN_cboNoiCap"),
+                utils.getValueByID(webData, "CN_txtSoCCCD"),
+                utils.getValueByID(webData, "CN_txtNcCCCD"),
+                utils.getValueFromComboBoxByID(webData, "CN_cboTonGiao"),
+                utils.getValueByID(webData, "CN_txtTKNHang"),
+                utils.getValueByID(webData, "CN_txtNgHang"),
+                utils.getValueByID(webData, "CN_txtSoBHYT"),
+                utils.getValueByID(webData, "CN_txtHanBHYT"),
+                utils.getValueByID(webData, "MainContent_CN_txtNganh"),
+                utils.getValueByID(webData, "CN_txtLop"),
+                utils.getValueByID(webData, "MainContent_CN_txtCTDT"),
+                utils.getValueByID(webData, "MainContent_CN_txtCT2"),
+                utils.getValueByID(webData, "CN_txtMail1"),
+                utils.getValueByID(webData, "CN_txtMail2"),
+                utils.getValueByID(webData, "CN_txtMK365"),
+                utils.getValueByID(webData, "CN_txtFace"),
+                utils.getValueByID(webData, "CN_txtPhone"),
+                utils.getValueByID(webData, "CN_txtCuTru"),
+                utils.getValueFromComboBoxByID(webData, "CN_cboDCCua"),
+                utils.getValueFromComboBoxByID(webData, "CN_cboTinhCTru"),
+                utils.getValueFromComboBoxByID(webData, "CN_cboQuanCTru"),
+                utils.getValueFromComboBoxByID(webData, "CN_divPhuongCTru"),
                 "");
 
         Element element = webData.getElementById("Main_lblHoTen");
@@ -447,9 +498,9 @@ public class Account {
             throw new Exception("No account logged in this session. May be you haven't logged in?");
         }
 
-        ArrayList<WrapperRequestHeader> headers = new ArrayList<>(Arrays.asList(
-                new WrapperRequestHeader("Cookie", sessionIdToCookie(sessionId))));
-        WrapperResponse response = WrapperRequest.get(
+        List<HttpClientWrapper.Header> headers = new ArrayList<>(Arrays.asList(
+                new HttpClientWrapper.Header("Cookie", utils.sessionIdToCookie(sessionId))));
+        HttpClientWrapper.Response response = HttpClientWrapper.get(
                 Variables.URL_ACCOUNTTRAININGSTATUS,
                 headers,
                 60);
@@ -525,17 +576,17 @@ public class Account {
                     cellList.get(2).hasClass("GridCheck"),
                     cellList.get(3).text(),
                     cellList.get(4).text(),
-                    Double.parseDouble(cellList.get(5).text()),
+                    utils.cellToDoubleOrNull(cellList.get(5)),
                     cellList.get(6).text().isEmpty() ? null : cellList.get(6).text(),
-                    cellList.get(7).text().isEmpty() ? null : Double.parseDouble(cellList.get(7).text()),
-                    cellList.get(8).text().isEmpty() ? null : Double.parseDouble(cellList.get(8).text()),
-                    cellList.get(9).text().isEmpty() ? null : Double.parseDouble(cellList.get(9).text()),
-                    cellList.get(10).text().isEmpty() ? null : Double.parseDouble(cellList.get(10).text()),
-                    cellList.get(11).text().isEmpty() ? null : Double.parseDouble(cellList.get(11).text()),
-                    cellList.get(12).text().isEmpty() ? null : Double.parseDouble(cellList.get(12).text()),
-                    cellList.get(13).text().isEmpty() ? null : Double.parseDouble(cellList.get(13).text()),
-                    cellList.get(14).text().isEmpty() ? null : Double.parseDouble(cellList.get(14).text()),
-                    cellList.get(15).text().isEmpty() ? null : Double.parseDouble(cellList.get(15).text()),
+                    utils.cellToDoubleOrNull(cellList.get(7)),
+                    utils.cellToDoubleOrNull(cellList.get(8)),
+                    utils.cellToDoubleOrNull(cellList.get(9)),
+                    utils.cellToDoubleOrNull(cellList.get(10)),
+                    utils.cellToDoubleOrNull(cellList.get(11)),
+                    utils.cellToDoubleOrNull(cellList.get(12)),
+                    utils.cellToDoubleOrNull(cellList.get(13)),
+                    utils.cellToDoubleOrNull(cellList.get(14)),
+                    utils.cellToDoubleOrNull(cellList.get(15)),
                     cellList.get(16).text(),
                     accSubjectResult.stream().anyMatch(p -> p.getName() == cellList.get(4).text()));
 
@@ -544,13 +595,5 @@ public class Account {
         result.setSubjectResultList(accSubjectResult);
 
         return result;
-    }
-
-    interface WebDocumentUtils {
-        @Nullable
-        String getValueByID(Document webData, String elementId);
-
-        @Nullable
-        String getValueFromComboBoxByID(Document webData, String elementId);
     }
 }

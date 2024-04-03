@@ -4,7 +4,6 @@ import org.junit.jupiter.api.Test;
 
 import com.google.gson.Gson;
 
-import io.dutwrapper.dutwrapper.customrequest2.WrapperResponse;
 import io.dutwrapper.dutwrapper.model.accounts.AccountInformation;
 import io.dutwrapper.dutwrapper.model.accounts.SubjectFeeItem;
 import io.dutwrapper.dutwrapper.model.accounts.SubjectScheduleItem;
@@ -15,7 +14,7 @@ import java.util.ArrayList;
 
 class AccountTest {
     static String initialize() throws IOException {
-        WrapperResponse response = Account.getSessionId();
+        HttpClientWrapper.Response response = Account.getSessionId();
         return response.getSessionId();
     }
 
@@ -72,11 +71,6 @@ class AccountTest {
             System.out.println("Logged out!");
         } else
             throw new Exception("This Session ID hasn't logged out yet!");
-    }
-
-    @Test
-    void test1() throws Exception {
-        WrapperRequest.Response d1 = WrapperRequest.get(new WrapperRequest.RequestGet("http://sv.dut.udn.vn/", null, 60));
     }
 
     @Test

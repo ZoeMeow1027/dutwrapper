@@ -16,8 +16,6 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import io.dutwrapper.dutwrapper.customrequest2.WrapperRequest;
-import io.dutwrapper.dutwrapper.customrequest2.WrapperResponse;
 import io.dutwrapper.dutwrapper.model.utils.DutSchoolYearItem;
 
 public class Utils {
@@ -65,8 +63,9 @@ public class Utils {
         return date;
     }
 
+    @SuppressWarnings("null")
     public static DutSchoolYearItem getCurrentSchoolWeek() throws Exception {
-        WrapperResponse response = WrapperRequest.get(Variables.URL_SCHOOLCURRENTWEEK, null, 60);
+        HttpClientWrapper.Response response = HttpClientWrapper.get(Variables.URL_SCHOOLCURRENTWEEK, null, 60);
         if (response.getException() != null) {
             throw response.getException();
         }

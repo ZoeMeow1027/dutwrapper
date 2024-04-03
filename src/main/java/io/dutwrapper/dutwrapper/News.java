@@ -5,8 +5,6 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import io.dutwrapper.dutwrapper.customrequest2.WrapperRequest;
-import io.dutwrapper.dutwrapper.customrequest2.WrapperResponse;
 import io.dutwrapper.dutwrapper.model.accounts.LessonItem;
 import io.dutwrapper.dutwrapper.model.accounts.SubjectCodeItem;
 import io.dutwrapper.dutwrapper.model.enums.LessonStatus;
@@ -35,6 +33,7 @@ import javax.annotation.Nullable;
 
 @SuppressWarnings("SpellCheckingInspection")
 public class News {
+    @SuppressWarnings("null")
     public static ArrayList<NewsGlobalItem> getNews(
             @Nullable NewsType newsType,
             @Nullable Integer page,
@@ -47,7 +46,7 @@ public class News {
                 searchType == null ? NewsSearchType.ByTitle.toString() : searchType.toString(),
                 URLEncoder.encode(searchQuery == null ? "" : searchQuery, StandardCharsets.UTF_8.toString()));
 
-        WrapperResponse response = WrapperRequest.get(url, null, 60);
+        HttpClientWrapper.Response response = HttpClientWrapper.get(url, null, 60);
         if (response.getException() != null) {
             throw response.getException();
         }
