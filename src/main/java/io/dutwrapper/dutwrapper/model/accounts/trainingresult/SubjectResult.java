@@ -12,7 +12,7 @@ public class SubjectResult {
     @Nullable
     String pointFormula;
     @Nullable
-    Double pointBT, pointBV, pointCC, pointCK, pointGK, pointQT, pointTH, pointTT;
+    Double pointBT, pointBV, pointCC, pointCK, pointGK, pointQT, pointTH;
     @Nullable
     Double resultT4, resultT10;
     @Nullable
@@ -24,7 +24,7 @@ public class SubjectResult {
 
     public SubjectResult(Integer index, String schoolYear, Boolean isExtendedSemester, String id, String name,
             Double credit, String pointFormula, Double pointBT, Double pointBV, Double pointCC, Double pointCK,
-            Double pointGK, Double pointQT, Double pointTH, Double pointTT, Double resultT10, Double resultT4, String resultByCharacter,
+            Double pointGK, Double pointQT, Double pointTH, Double resultT10, Double resultT4, String resultByCharacter,
             Boolean isReStudy) {
         this.index = index;
         this.schoolYear = schoolYear;
@@ -40,7 +40,6 @@ public class SubjectResult {
         this.pointGK = pointGK;
         this.pointQT = pointQT;
         this.pointTH = pointTH;
-        this.pointTT = pointTT;
         this.resultT4 = resultT4;
         this.resultT10 = resultT10;
         this.resultByCharacter = resultByCharacter;
@@ -157,14 +156,6 @@ public class SubjectResult {
 
     public void setPointTH(Double pointTH) {
         this.pointTH = pointTH;
-    }
-
-    public @Nullable Double getPointTT() {
-        return pointTT;
-    }
-
-    public void setPointTT(Double pointTT) {
-        this.pointTT = pointTT;
     }
 
     public @Nullable Double getResultT4() {

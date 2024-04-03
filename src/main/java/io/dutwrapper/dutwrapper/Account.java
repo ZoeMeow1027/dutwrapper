@@ -536,8 +536,7 @@ public class Account {
                     cellList.get(13).text().isEmpty() ? null : Double.parseDouble(cellList.get(13).text()),
                     cellList.get(14).text().isEmpty() ? null : Double.parseDouble(cellList.get(14).text()),
                     cellList.get(15).text().isEmpty() ? null : Double.parseDouble(cellList.get(15).text()),
-                    cellList.get(16).text().isEmpty() ? null : Double.parseDouble(cellList.get(16).text()),
-                    cellList.get(17).text(),
+                    cellList.get(16).text(),
                     accSubjectResult.stream().anyMatch(p -> p.getName() == cellList.get(4).text()));
 
             accSubjectResult.add(item);
