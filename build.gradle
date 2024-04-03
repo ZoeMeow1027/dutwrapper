@@ -3,7 +3,7 @@ plugins {
 }
 
 group 'io.dutwrapper.dutwrapper'
-version '1.8.4'
+version '1.9.0'
 
 repositories {
     mavenCentral()
@@ -22,7 +22,7 @@ dependencies {
 
     // This dependency is used internally, and not exposed to consumers on their own compile classpath.
     // Guava - https://mvnrepository.com/artifact/com.google.guava/guava
-    implementation 'com.google.guava:guava:33.0.0-jre'
+    implementation 'com.google.guava:guava:33.1.0-jre'
 
     // JSoup - https://mvnrepository.com/artifact/org.jsoup/jsoup
     implementation 'org.jsoup:jsoup:1.17.2'

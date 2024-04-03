@@ -4,7 +4,6 @@ import org.junit.jupiter.api.Test;
 
 import com.google.gson.Gson;
 
-import io.dutwrapper.dutwrapper.customrequest.CustomResponse;
 import io.dutwrapper.dutwrapper.model.accounts.AccountInformation;
 import io.dutwrapper.dutwrapper.model.accounts.SubjectFeeItem;
 import io.dutwrapper.dutwrapper.model.accounts.SubjectScheduleItem;
@@ -15,7 +14,7 @@ import java.util.ArrayList;
 
 class AccountTest {
     static String initialize() throws IOException {
-        CustomResponse response = Account.getSessionId();
+        HttpClientWrapper.Response response = Account.getSessionId();
         return response.getSessionId();
     }
 
