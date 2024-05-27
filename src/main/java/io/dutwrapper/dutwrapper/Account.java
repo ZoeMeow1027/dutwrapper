@@ -587,7 +587,8 @@ public class Account {
                     utils.cellToDoubleOrNull(cellList.get(13)),
                     utils.cellToDoubleOrNull(cellList.get(14)),
                     utils.cellToDoubleOrNull(cellList.get(15)),
-                    cellList.get(16).text(),
+                    utils.cellToDoubleOrNull(cellList.get(16)),
+                    cellList.get(17).text(),
                     accSubjectResult.stream().anyMatch(p -> p.getName() == cellList.get(4).text()));
 
             accSubjectResult.add(item);

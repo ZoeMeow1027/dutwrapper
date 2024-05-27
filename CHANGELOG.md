@@ -3,7 +3,8 @@
 This file will list all version log for modified, add or remove function of dutwrapper.
 
 ## 1.9.1
-- Fixed issues cause SubjectCodeItem parses failed (by change all variables to string).
+- Fixed issue cause SubjectCodeItem parses failed (by change all variables to string).
+- Fixed issue cause AccountTrainingStatus parses wrong data.
 
 ## 1.9.0
 - Move all HttpClientWrapper to project root (customrequest2 to HttpClientWrapper).
