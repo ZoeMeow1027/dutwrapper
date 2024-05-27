@@ -85,7 +85,7 @@ public class Account {
             }
             try {
                 return Double.parseDouble(data);
-            } catch (Exception _) {
+            } catch (Exception ex) {
                 return null;
             }
         }
@@ -99,7 +99,7 @@ public class Account {
             }
             try {
                 return Integer.parseInt(data);
-            } catch (Exception _) {
+            } catch (Exception ex) {
                 return null;
             }        
         }
