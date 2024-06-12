@@ -2,6 +2,10 @@
 
 This file will list all version log for modified, add or remove function of dutwrapper.
 
+## 1.9.2
+- Fixed cannot login account using this library.
+  - Sv.dut.udn.vn seems to reboot server again, so __VIEWSTATE changed again.
+
 ## 1.9.1
 - Fixed issue cause SubjectCodeItem parses failed (by change all variables to string).
 - Fixed issue cause AccountTrainingStatus parses wrong data.
