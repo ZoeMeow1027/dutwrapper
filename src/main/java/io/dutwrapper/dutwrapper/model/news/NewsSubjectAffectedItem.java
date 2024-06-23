@@ -3,10 +3,14 @@ package io.dutwrapper.dutwrapper.model.news;
 import java.io.Serializable;
 import java.util.ArrayList;
 
+import com.google.gson.annotations.SerializedName;
+
 import io.dutwrapper.dutwrapper.model.accounts.SubjectCodeItem;
 
 public class NewsSubjectAffectedItem implements Serializable {
+    @SerializedName("code_list")
     private ArrayList<SubjectCodeItem> codeList = new ArrayList<>();
+    @SerializedName("name")
     private String subjectName = "";
 
     public NewsSubjectAffectedItem() { }

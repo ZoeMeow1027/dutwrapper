@@ -1,20 +1,5 @@
 package io.dutwrapper.dutwrapper;
 
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
-
-import io.dutwrapper.dutwrapper.model.accounts.*;
-import io.dutwrapper.dutwrapper.model.accounts.trainingresult.AccountTrainingStatus;
-import io.dutwrapper.dutwrapper.model.accounts.trainingresult.GraduateStatus;
-import io.dutwrapper.dutwrapper.model.accounts.trainingresult.SubjectResult;
-import io.dutwrapper.dutwrapper.model.accounts.trainingresult.TrainingSummary;
-
-import javax.annotation.Nullable;
-
-import static io.dutwrapper.dutwrapper.Variables.*;
-
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -24,125 +9,155 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@SuppressWarnings({ "SpellCheckingInspection", "UnusedReturnValue" })
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+
+import io.dutwrapper.dutwrapper.model.accounts.AccountInformation;
+import io.dutwrapper.dutwrapper.model.accounts.LessonItem;
+import io.dutwrapper.dutwrapper.model.accounts.ScheduleExam;
+import io.dutwrapper.dutwrapper.model.accounts.ScheduleItem;
+import io.dutwrapper.dutwrapper.model.accounts.ScheduleStudy;
+import io.dutwrapper.dutwrapper.model.accounts.SubjectCodeItem;
+import io.dutwrapper.dutwrapper.model.accounts.SubjectFeeItem;
+import io.dutwrapper.dutwrapper.model.accounts.SubjectScheduleItem;
+import io.dutwrapper.dutwrapper.model.accounts.WeekItem;
+import io.dutwrapper.dutwrapper.model.accounts.trainingresult.AccountTrainingStatus;
+import io.dutwrapper.dutwrapper.model.accounts.trainingresult.GraduateStatus;
+import io.dutwrapper.dutwrapper.model.accounts.trainingresult.SubjectResult;
+import io.dutwrapper.dutwrapper.model.accounts.trainingresult.TrainingSummary;
+
 public class Account {
-    interface AccountUtils {
+    public static class AuthInfo {
         @Nullable
-        String getValueByID(Document webData, String elementId);
+        String username = null;
+        @Nullable
+        String password = null;
 
-        @Nullable
-        String getValueFromComboBoxByID(Document webData, String elementId);
+        public AuthInfo(@Nullable String username, @Nullable String password) {
+            this.username = username;
+            this.password = password;
+        }
 
-        @Nullable
-        Integer cellToIntegerOrNull(Element element);
+        @SuppressWarnings("null")
+        public boolean isVaildAuth() {
+            // Check username
+            if (username == null)
+                return false;
+            if (username.length() < 6)
+                return false;
+            // Check password
+            if (password == null)
+                return false;
+            if (password.length() < 6)
+                return false;
+            // Otherwise, return true
+            return true;
+        }
 
-        @Nullable
-        Double cellToDoubleOrNull(Element element);
-        
-        String sessionIdToCookie(String sessionId);
+        public @Nullable String getUsername() {
+            return username;
+        }
+
+        public @Nullable String getPassword() {
+            return password;
+        }
     }
 
-    private static final AccountUtils utils = new AccountUtils() {
-        public @Nullable String getValueByID(Document webData, String elementId) {
-            Element element = webData.getElementById(elementId);
-            if (element != null) {
-                return element.val().length() > 0 ? element.val() : null;
-            } else
-                return null;
-        }
-
-        // https://stackoverflow.com/a/22929670
-        public @Nullable String getValueFromComboBoxByID(Document webData, String elementId) {
-            String result = null;
-            Element options = webData.getElementById(elementId);
-            if (options != null) {
-                for (Element option : options.children()) {
-                    if (option.hasAttr("selected")) {
-                        result = option.text();
-                        break;
-                    }
-                }
-            }
-
-            return result;
-        }
-
-        @Override
-        public String sessionIdToCookie(String sessionId) {
-            StringBuilder sb = new StringBuilder();
-            if (sessionId != null) {
-                sb.append("ASP.NET_SessionId").append("=").append(sessionId).append(";");
-            }
-            return sb.toString();
-        }
-
-        @Override
+    public static class Session {
         @Nullable
-        public Double cellToDoubleOrNull(Element element) {
-            String data = element.text();
-            if (data.isEmpty()) {
-                return null;
-            }
+        String sessionId = null;
+        @Nullable
+        String viewState = null;
+        @Nullable
+        String viewStateGenerator = null;
+
+        public Session(@Nullable String sessionId, @Nullable String viewState,
+                @Nullable String viewStateGenerator) {
+            this.sessionId = sessionId;
+            this.viewState = viewState;
+            this.viewStateGenerator = viewStateGenerator;
+        }
+
+        public @Nullable String getSessionId() {
+            return sessionId;
+        }
+
+        public @Nullable String getViewState() {
+            return viewState;
+        }
+
+        public @Nullable String getViewStateGenerator() {
+            return viewStateGenerator;
+        }
+
+        public boolean isVaildSession() {
+            return (sessionId != null) && (viewState != null)
+                    && (viewStateGenerator != null);
+        }
+    }
+
+    @SuppressWarnings("null")
+    public static Session getSession() throws IOException, Exception {
+        HttpClientWrapper.Response get = HttpClientWrapper.get(Variables.URL_LOGIN, null, 60);
+        if (get.getException() != null) {
+            throw get.getException();
+        }
+        if (get.getStatusCode() / 100 != 2) {
+            throw new Exception(
+                    String.format("Request not successful: Web returned with code %d", get.getStatusCode()));
+        }
+        Session session = new Session(get.getSessionId(), null, null);
+        if (get.getContent() != null) {
             try {
-                return Double.parseDouble(data);
+                Document webData = Jsoup.parse(get.getContent());
+                session = new Session(
+                        session.getSessionId(),
+                        webData.getElementById("__VIEWSTATE").val(),
+                        webData.getElementById("__VIEWSTATEGENERATOR").val());
             } catch (Exception ex) {
-                return null;
             }
         }
-
-        @Override
-        @Nullable
-        public Integer cellToIntegerOrNull(Element element) {
-            String data = element.text();
-            if (data.isEmpty()) {
-                return null;
-            }
-            try {
-                return Integer.parseInt(data);
-            } catch (Exception ex) {
-                return null;
-            }        
-        }
-    };
-
-    public static HttpClientWrapper.Response getSessionId() throws IOException {
-        return HttpClientWrapper.get(URL_MAINPAGE, null, 60);
+        return session;
     }
 
-    public static HttpClientWrapper.Response login(String user, String pass) throws Exception {
-        HttpClientWrapper.Response sessionId = getSessionId();
-        if (sessionId.getSessionId() == null) {
-            throw new Exception("No session id found!");
-        }
-        return login(sessionId.getSessionId(), user, pass);
-    }
+    @SuppressWarnings("null")
+    public static void login(@Nonnull Session session, @Nonnull AuthInfo auth) throws Exception {
+        if (!session.isVaildSession())
+            throw new Exception("Invaild session!");
 
-    public static HttpClientWrapper.Response login(String sessionId, String user, String pass) throws IOException {
         Map<String, String> data = new HashMap<String, String>();
-        data.put("__VIEWSTATE", Variables.__VIEWSTATE);
-        data.put("__VIEWSTATEGENERATOR", Variables.__VIEWSTATEGENERATOR);
-        data.put("_ctl0:MainContent:DN_txtAcc", user);
-        data.put("_ctl0:MainContent:DN_txtPass", pass);
-        data.put("_ctl0:MainContent:QLTH_btnLogin", Variables.QLTH_btnLogin);
+        data.put("__VIEWSTATE", session.getViewState());
+        data.put("__VIEWSTATEGENERATOR", session.getViewStateGenerator());
+        data.put("_ctl0:MainContent:DN_txtAcc", auth.getUsername());
+        data.put("_ctl0:MainContent:DN_txtPass", auth.getPassword());
+        data.put("_ctl0:MainContent:QLTH_btnLogin", "Đăng+nhập");
 
         List<HttpClientWrapper.Header> headers = new ArrayList<>(Arrays.asList(
-                new HttpClientWrapper.Header("Cookie", utils.sessionIdToCookie(sessionId))));
+                new HttpClientWrapper.Header("Cookie",
+                        Utils.jsoupExtraUtils.sessionIdToSubCookie(session.getSessionId()))));
 
-        return HttpClientWrapper.post(
+        HttpClientWrapper.post(
                 Variables.URL_LOGIN,
                 Utils.toUrlEncode(data, "UTF-8"),
                 headers,
                 60);
     }
 
-    public static Boolean isLoggedIn(String sessionId) throws Exception {
-        List<HttpClientWrapper.Header> headers = new ArrayList<>(Arrays.asList(
-                new HttpClientWrapper.Header("Cookie", utils.sessionIdToCookie(sessionId))));
+    @SuppressWarnings("null")
+    public static boolean isLoggedIn(@Nonnull Session session) throws Exception {
+        if (!session.isVaildSession())
+            throw new Exception("Invaild session!");
 
-        HttpClientWrapper.Response response = HttpClientWrapper.get(
-                Variables.URL_CHECKLOGGEDIN,
-                headers,
-                60);
+        List<HttpClientWrapper.Header> headers = new ArrayList<>(Arrays.asList(
+                new HttpClientWrapper.Header("Cookie",
+                        Utils.jsoupExtraUtils.sessionIdToSubCookie(session.getSessionId()))));
+
+        HttpClientWrapper.Response response = HttpClientWrapper.get(Variables.URL_CHECKLOGGEDIN, headers, 60);
 
         if (response.getException() != null) {
             throw response.getException();
@@ -151,19 +166,28 @@ public class Account {
         return response.getStatusCode() >= 200 && response.getStatusCode() < 300;
     }
 
-    public static HttpClientWrapper.Response logout(String sessionId) throws IOException {
-        List<HttpClientWrapper.Header> headers = new ArrayList<>(Arrays.asList(
-                new HttpClientWrapper.Header("Cookie", utils.sessionIdToCookie(sessionId))));
+    @SuppressWarnings("null")
+    public static void logout(@Nonnull Session session) throws Exception {
+        if (!session.isVaildSession())
+            throw new Exception("Invaild session!");
 
-        return HttpClientWrapper.get(
-                Variables.URL_LOGOUT,
-                headers, 60);
+        List<HttpClientWrapper.Header> headers = new ArrayList<>(Arrays.asList(
+                new HttpClientWrapper.Header("Cookie",
+                        Utils.jsoupExtraUtils.sessionIdToSubCookie(session.getSessionId()))));
+
+        HttpClientWrapper.get(Variables.URL_LOGOUT, headers, 60);
     }
 
-    public static ArrayList<SubjectScheduleItem> getSubjectSchedule(String sessionId, Integer year, Integer semester)
+    @SuppressWarnings("null")
+    public static ArrayList<SubjectScheduleItem> fetchSubjectSchedule(@Nonnull Session session, @Nonnull Integer year,
+            @Nonnull Integer semester)
             throws Exception {
-        if (!isLoggedIn(sessionId)) {
-            throw new Exception("No account logged in this session. May be you haven't logged in?");
+        if (!session.isVaildSession())
+            throw new Exception("Invaild session!");
+
+        if (!isLoggedIn(session)) {
+            throw new Exception(
+                    "No account logged in this session. May be you haven't logged in or this session is expired?");
         }
 
         String url;
@@ -180,7 +204,8 @@ public class Account {
         }
 
         List<HttpClientWrapper.Header> headers = new ArrayList<>(Arrays.asList(
-                new HttpClientWrapper.Header("Cookie", utils.sessionIdToCookie(sessionId))));
+                new HttpClientWrapper.Header("Cookie",
+                        Utils.jsoupExtraUtils.sessionIdToSubCookie(session.getSessionId()))));
         HttpClientWrapper.Response response = HttpClientWrapper.get(
                 url,
                 headers,
@@ -192,7 +217,7 @@ public class Account {
 
         if (response.getStatusCode() < 200 || response.getStatusCode() >= 300) {
             throw new Exception(String.format(
-                    "Server was return with code %d. May be you haven't logged in?",
+                    "Server was return with code %d. May be you haven't logged in or this session is expired?",
                     response.getStatusCode()));
         }
 
@@ -344,10 +369,16 @@ public class Account {
         return result;
     }
 
-    public static ArrayList<SubjectFeeItem> getSubjectFee(String sessionId, Integer year, Integer semester)
+    @SuppressWarnings("null")
+    public static ArrayList<SubjectFeeItem> fetchSubjectFee(@Nonnull Session session, @Nonnull Integer year,
+            @Nonnull Integer semester)
             throws Exception {
-        if (!isLoggedIn(sessionId)) {
-            throw new Exception("No account logged in this session. May be you haven't logged in?");
+        if (!session.isVaildSession())
+            throw new Exception("Invaild session!");
+
+        if (!isLoggedIn(session)) {
+            throw new Exception(
+                    "No account logged in this session. May be you haven't logged in or this session is expired?");
         }
 
         String url;
@@ -364,7 +395,8 @@ public class Account {
         }
 
         List<HttpClientWrapper.Header> headers = new ArrayList<>(Arrays.asList(
-                new HttpClientWrapper.Header("Cookie", utils.sessionIdToCookie(sessionId))));
+                new HttpClientWrapper.Header("Cookie",
+                        Utils.jsoupExtraUtils.sessionIdToSubCookie(session.getSessionId()))));
         HttpClientWrapper.Response response = HttpClientWrapper.get(
                 url,
                 headers,
@@ -423,13 +455,19 @@ public class Account {
         return result;
     }
 
-    public static AccountInformation getAccountInformation(String sessionId) throws Exception {
-        if (!isLoggedIn(sessionId)) {
-            throw new Exception("No account logged in this session. May be you haven't logged in?");
+    @SuppressWarnings("null")
+    public static AccountInformation fetchAccountInformation(@Nonnull Session session) throws Exception {
+        if (!session.isVaildSession())
+            throw new Exception("Invaild session!");
+
+        if (!isLoggedIn(session)) {
+            throw new Exception(
+                    "No account logged in this session. May be you haven't logged in or this session is expired?");
         }
 
         ArrayList<HttpClientWrapper.Header> headers = new ArrayList<>(Arrays.asList(
-                new HttpClientWrapper.Header("Cookie", utils.sessionIdToCookie(sessionId))));
+                new HttpClientWrapper.Header("Cookie",
+                        Utils.jsoupExtraUtils.sessionIdToSubCookie(session.getSessionId()))));
         HttpClientWrapper.Response response = HttpClientWrapper.get(
                 Variables.URL_ACCOUNTINFORMATION,
                 headers,
@@ -451,36 +489,45 @@ public class Account {
 
         Document webData = Jsoup.parse(response.getContent());
         AccountInformation result = new AccountInformation(
-                utils.getValueByID(webData, "CN_txtHoTen"),
-                utils.getValueByID(webData, "CN_txtNgaySinh"),
-                utils.getValueFromComboBoxByID(webData, "CN_cboNoiSinh"),
-                utils.getValueByID(webData, "CN_txtGioiTinh"),
-                utils.getValueFromComboBoxByID(webData, "CN_cboDanToc"),
-                utils.getValueFromComboBoxByID(webData, "CN_cboQuocTich"),
-                utils.getValueByID(webData, "CN_txtSoCMND"),
-                utils.getValueByID(webData, "CN_txtNgayCap"),
-                utils.getValueFromComboBoxByID(webData, "CN_cboNoiCap"),
-                utils.getValueByID(webData, "CN_txtSoCCCD"),
-                utils.getValueByID(webData, "CN_txtNcCCCD"),
-                utils.getValueFromComboBoxByID(webData, "CN_cboTonGiao"),
-                utils.getValueByID(webData, "CN_txtTKNHang"),
-                utils.getValueByID(webData, "CN_txtNgHang"),
-                utils.getValueByID(webData, "CN_txtSoBHYT"),
-                utils.getValueByID(webData, "CN_txtHanBHYT"),
-                utils.getValueByID(webData, "MainContent_CN_txtNganh"),
-                utils.getValueByID(webData, "CN_txtLop"),
-                utils.getValueByID(webData, "MainContent_CN_txtCTDT"),
-                utils.getValueByID(webData, "MainContent_CN_txtCT2"),
-                utils.getValueByID(webData, "CN_txtMail1"),
-                utils.getValueByID(webData, "CN_txtMail2"),
-                utils.getValueByID(webData, "CN_txtMK365"),
-                utils.getValueByID(webData, "CN_txtFace"),
-                utils.getValueByID(webData, "CN_txtPhone"),
-                utils.getValueByID(webData, "CN_txtCuTru"),
-                utils.getValueFromComboBoxByID(webData, "CN_cboDCCua"),
-                utils.getValueFromComboBoxByID(webData, "CN_cboTinhCTru"),
-                utils.getValueFromComboBoxByID(webData, "CN_cboQuanCTru"),
-                utils.getValueFromComboBoxByID(webData, "CN_divPhuongCTru"),
+                Utils.jsoupExtraUtils.getValue(webData.getElementById("CN_txtHoTen")),
+                Utils.jsoupExtraUtils.getValue(webData.getElementById("CN_txtNgaySinh")),
+                Utils.jsoupExtraUtils.getText(
+                        Utils.jsoupExtraUtils.getSelectedValueFromComboBox(webData.getElementById("CN_cboNoiSinh"))),
+                Utils.jsoupExtraUtils.getValue(webData.getElementById("CN_txtGioiTinh")),
+                Utils.jsoupExtraUtils.getText(
+                        Utils.jsoupExtraUtils.getSelectedValueFromComboBox(webData.getElementById("CN_cboDanToc"))),
+                Utils.jsoupExtraUtils.getText(
+                        Utils.jsoupExtraUtils.getSelectedValueFromComboBox(webData.getElementById("CN_cboQuocTich"))),
+                Utils.jsoupExtraUtils.getValue(webData.getElementById("CN_txtSoCMND")),
+                Utils.jsoupExtraUtils.getValue(webData.getElementById("CN_txtNgayCap")),
+                Utils.jsoupExtraUtils.getText(
+                        Utils.jsoupExtraUtils.getSelectedValueFromComboBox(webData.getElementById("CN_cboNoiCap"))),
+                Utils.jsoupExtraUtils.getValue(webData.getElementById("CN_txtSoCCCD")),
+                Utils.jsoupExtraUtils.getValue(webData.getElementById("CN_txtNcCCCD")),
+                Utils.jsoupExtraUtils.getText(
+                        Utils.jsoupExtraUtils.getSelectedValueFromComboBox(webData.getElementById("CN_cboTonGiao"))),
+                Utils.jsoupExtraUtils.getValue(webData.getElementById("CN_txtTKNHang")),
+                Utils.jsoupExtraUtils.getValue(webData.getElementById("CN_txtNgHang")),
+                Utils.jsoupExtraUtils.getValue(webData.getElementById("CN_txtSoBHYT")),
+                Utils.jsoupExtraUtils.getValue(webData.getElementById("CN_txtHanBHYT")),
+                Utils.jsoupExtraUtils.getValue(webData.getElementById("MainContent_CN_txtNganh")),
+                Utils.jsoupExtraUtils.getValue(webData.getElementById("CN_txtLop")),
+                Utils.jsoupExtraUtils.getValue(webData.getElementById("MainContent_CN_txtCTDT")),
+                Utils.jsoupExtraUtils.getValue(webData.getElementById("MainContent_CN_txtCT2")),
+                Utils.jsoupExtraUtils.getValue(webData.getElementById("CN_txtMail1")),
+                Utils.jsoupExtraUtils.getValue(webData.getElementById("CN_txtMail2")),
+                Utils.jsoupExtraUtils.getValue(webData.getElementById("CN_txtMK365")),
+                Utils.jsoupExtraUtils.getValue(webData.getElementById("CN_txtFace")),
+                Utils.jsoupExtraUtils.getValue(webData.getElementById("CN_txtPhone")),
+                Utils.jsoupExtraUtils.getValue(webData.getElementById("CN_txtCuTru")),
+                Utils.jsoupExtraUtils.getText(
+                        Utils.jsoupExtraUtils.getSelectedValueFromComboBox(webData.getElementById("CN_cboDCCua"))),
+                Utils.jsoupExtraUtils.getText(
+                        Utils.jsoupExtraUtils.getSelectedValueFromComboBox(webData.getElementById("CN_cboTinhCTru"))),
+                Utils.jsoupExtraUtils.getText(
+                        Utils.jsoupExtraUtils.getSelectedValueFromComboBox(webData.getElementById("CN_cboQuanCTru"))),
+                Utils.jsoupExtraUtils.getText(
+                        Utils.jsoupExtraUtils.getSelectedValueFromComboBox(webData.getElementById("CN_divPhuongCTru"))),
                 "");
 
         Element element = webData.getElementById("Main_lblHoTen");
@@ -493,13 +540,19 @@ public class Account {
         return result;
     }
 
-    public static AccountTrainingStatus getAccountTrainingStatus(String sessionId) throws Exception {
-        if (!isLoggedIn(sessionId)) {
-            throw new Exception("No account logged in this session. May be you haven't logged in?");
+    @SuppressWarnings("null")
+    public static AccountTrainingStatus fetchAccountTrainingStatus(@Nonnull Session session) throws Exception {
+        if (!session.isVaildSession())
+            throw new Exception("Invaild session!");
+
+        if (!isLoggedIn(session)) {
+            throw new Exception(
+                    "No account logged in this session. May be you haven't logged in or this session is expired?");
         }
 
         List<HttpClientWrapper.Header> headers = new ArrayList<>(Arrays.asList(
-                new HttpClientWrapper.Header("Cookie", utils.sessionIdToCookie(sessionId))));
+                new HttpClientWrapper.Header("Cookie",
+                        Utils.jsoupExtraUtils.sessionIdToSubCookie(session.getSessionId()))));
         HttpClientWrapper.Response response = HttpClientWrapper.get(
                 Variables.URL_ACCOUNTTRAININGSTATUS,
                 headers,
@@ -576,18 +629,18 @@ public class Account {
                     cellList.get(2).hasClass("GridCheck"),
                     cellList.get(3).text(),
                     cellList.get(4).text(),
-                    utils.cellToDoubleOrNull(cellList.get(5)),
+                    Utils.jsoupExtraUtils.elementToDoubleOrNull(cellList.get(5)),
                     cellList.get(6).text().isEmpty() ? null : cellList.get(6).text(),
-                    utils.cellToDoubleOrNull(cellList.get(7)),
-                    utils.cellToDoubleOrNull(cellList.get(8)),
-                    utils.cellToDoubleOrNull(cellList.get(9)),
-                    utils.cellToDoubleOrNull(cellList.get(10)),
-                    utils.cellToDoubleOrNull(cellList.get(11)),
-                    utils.cellToDoubleOrNull(cellList.get(12)),
-                    utils.cellToDoubleOrNull(cellList.get(13)),
-                    utils.cellToDoubleOrNull(cellList.get(14)),
-                    utils.cellToDoubleOrNull(cellList.get(15)),
-                    utils.cellToDoubleOrNull(cellList.get(16)),
+                    Utils.jsoupExtraUtils.elementToDoubleOrNull(cellList.get(7)),
+                    Utils.jsoupExtraUtils.elementToDoubleOrNull(cellList.get(8)),
+                    Utils.jsoupExtraUtils.elementToDoubleOrNull(cellList.get(9)),
+                    Utils.jsoupExtraUtils.elementToDoubleOrNull(cellList.get(10)),
+                    Utils.jsoupExtraUtils.elementToDoubleOrNull(cellList.get(11)),
+                    Utils.jsoupExtraUtils.elementToDoubleOrNull(cellList.get(12)),
+                    Utils.jsoupExtraUtils.elementToDoubleOrNull(cellList.get(13)),
+                    Utils.jsoupExtraUtils.elementToDoubleOrNull(cellList.get(14)),
+                    Utils.jsoupExtraUtils.elementToDoubleOrNull(cellList.get(15)),
+                    Utils.jsoupExtraUtils.elementToDoubleOrNull(cellList.get(16)),
                     cellList.get(17).text(),
                     accSubjectResult.stream().anyMatch(p -> p.getName() == cellList.get(4).text()));
 

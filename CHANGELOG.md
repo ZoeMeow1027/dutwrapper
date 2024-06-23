@@ -2,6 +2,23 @@
 
 This file will list all version log for modified, add or remove function of dutwrapper.
 
+## 1.10.1
+- [Changed] Updated dependencies to latest.
+- [Fixed] `java.net.UnknownHostException` was thrown even you include them in try-catch.
+
+## 1.10.0
+- `Account.Session` class is now in part of Account class.
+  - This will ensure you can get `__VIEWSTATE` automatically to session (just use `Account.Session`, that's it).
+  - `Account.getSession()` is everything you need.
+- `login()` and `logout()` will now `void` instead of `boolean`.
+  - This will reduce `isLoggedIn` function to avoid extra requests.
+  - You will need to check session manually with `isLoggedIn`.
+- `GraduateStatus` class:
+  - `info1` will now `rewardsInfo`.
+  - `info2` will now `discipline`.
+  - `info3` will now `eligibleGraduationThesisStatus`.
+  - `approveGraduateProcessInfo` will now `eligibleGraduationStatus`.
+
 ## 1.9.2
 - Fixed cannot login account using this library.
   - Sv.dut.udn.vn seems to reboot server again, so __VIEWSTATE changed again.

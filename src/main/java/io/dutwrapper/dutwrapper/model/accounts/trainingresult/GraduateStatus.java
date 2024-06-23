@@ -8,31 +8,31 @@ public class GraduateStatus {
     private Boolean hasQualifiedGraduate;
 
     // Khen thuong
-    private String info1;
+    private String rewardsInfo;
 
     // Ky luat
-    private String info2;
+    private String discipline;
 
     // DATN
-    private String info3;
+    private String eligibleGraduationThesisStatus;
 
     // Thong tin xet tn
-    private String approveGraduateProcessInfo;
+    private String eligibleGraduationStatus;
 
     public GraduateStatus() {
     }
 
     public GraduateStatus(Boolean hasSigGDTC, Boolean hasSigGDQP, Boolean hasSigEnglish, Boolean hasSigIT,
-            Boolean hasQualifiedGraduate, String info1, String info2, String info3, String approveGraduateProcessInfo) {
+            Boolean hasQualifiedGraduate, String rewardsInfo, String discipline, String eligibleGraduationThesisStatus, String eligibleGraduationStatus) {
         this.hasSigGDTC = hasSigGDTC;
         this.hasSigGDQP = hasSigGDQP;
         this.hasSigEnglish = hasSigEnglish;
         this.hasSigIT = hasSigIT;
         this.hasQualifiedGraduate = hasQualifiedGraduate;
-        this.info1 = info1;
-        this.info2 = info2;
-        this.info3 = info3;
-        this.approveGraduateProcessInfo = approveGraduateProcessInfo;
+        this.rewardsInfo = rewardsInfo;
+        this.discipline = discipline;
+        this.eligibleGraduationThesisStatus = eligibleGraduationThesisStatus;
+        this.eligibleGraduationStatus = eligibleGraduationStatus;
     }
 
     public Boolean getHasSigGDTC() {
@@ -75,36 +75,36 @@ public class GraduateStatus {
         this.hasQualifiedGraduate = hasQualifiedGraduate;
     }
 
-    public String getInfo1() {
-        return info1;
+    public String getRewardsInfo() {
+        return rewardsInfo;
     }
 
-    public void setInfo1(String info1) {
-        this.info1 = info1;
+    public void setRewardsInfo(String info1) {
+        this.rewardsInfo = info1;
     }
 
-    public String getInfo2() {
-        return info2;
+    public String getDiscipline() {
+        return discipline;
     }
 
-    public void setInfo2(String info2) {
-        this.info2 = info2;
+    public void setDiscipline(String info2) {
+        this.discipline = info2;
     }
 
-    public String getInfo3() {
-        return info3;
+    public String getEligibleGraduationThesisStatus() {
+        return eligibleGraduationThesisStatus;
     }
 
-    public void setInfo3(String info3) {
-        this.info3 = info3;
+    public void setEligibleGraduationThesisStatus(String info3) {
+        this.eligibleGraduationThesisStatus = info3;
     }
 
-    public String getApproveGraduateProcessInfo() {
-        return approveGraduateProcessInfo;
+    public String getEligibleGraduationStatus() {
+        return eligibleGraduationStatus;
     }
 
-    public void setApproveGraduateProcessInfo(String approveGraduateProcessInfo) {
-        this.approveGraduateProcessInfo = approveGraduateProcessInfo;
+    public void setEligibleGraduationStatus(String approveGraduateProcessInfo) {
+        this.eligibleGraduationStatus = approveGraduateProcessInfo;
     }
 
 }

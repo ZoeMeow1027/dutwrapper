@@ -3,7 +3,7 @@ plugins {
 }
 
 group 'io.dutwrapper.dutwrapper'
-version '1.9.2'
+version '1.10.1'
 
 repositories {
     mavenCentral()
@@ -22,16 +22,16 @@ dependencies {
 
     // This dependency is used internally, and not exposed to consumers on their own compile classpath.
     // Guava - https://mvnrepository.com/artifact/com.google.guava/guava
-    implementation 'com.google.guava:guava:33.1.0-jre'
+    implementation 'com.google.guava:guava:33.2.1-jre'
 
     // JSoup - https://mvnrepository.com/artifact/org.jsoup/jsoup
     implementation 'org.jsoup:jsoup:1.17.2'
 
     // OkHttp3 - https://mvnrepository.com/artifact/com.squareup.okhttp3/okhttp
-    implementation 'com.squareup.okhttp3:okhttp:5.0.0-alpha.12'
+    implementation 'com.squareup.okhttp3:okhttp:5.0.0-alpha.14'
 
     // Google Gson - https://mvnrepository.com/artifact/com.google.code.gson/gson
-    implementation 'com.google.code.gson:gson:2.10.1'
+    implementation 'com.google.code.gson:gson:2.11.0'
 }
 
 test {

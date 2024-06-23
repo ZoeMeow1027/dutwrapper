@@ -1,5 +1,7 @@
 package io.dutwrapper.dutwrapper;
 
+import java.io.IOException;
+import java.net.UnknownHostException;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -101,6 +103,9 @@ public class HttpClientWrapper {
             this.sessionId = sessionId;
         }
 
+        public void throwExceptionIfExist() throws Exception, IOException {
+            if (exception != null) throw exception;
+        }
     }
 
     private static @Nullable String getSessionIdFromHeader(Headers header) {
@@ -131,7 +136,12 @@ public class HttpClientWrapper {
                 }
             }
             throw new Exception("Not found session id in cookie!");
+            // https://stackoverflow.com/questions/4959859/why-is-unknownhostexception-not-caught-in-exception-java
+        } catch (UnknownHostException uheEx) {
+            uheEx.printStackTrace();
+            return null;
         } catch (Exception ex) {
+            ex.printStackTrace();
             return null;
         }
     }
@@ -177,7 +187,12 @@ public class HttpClientWrapper {
         } catch (NullPointerException nullEx) {
             return new Response(
                     null, null, nullEx, nullEx.getMessage(), null);
+        } catch (UnknownHostException uheEx) {
+            uheEx.printStackTrace();
+            return new Response(
+                    null, null, uheEx, uheEx.getMessage(), null);
         } catch (Exception ex) {
+            ex.printStackTrace();
             return new Response(
                     null, null, ex, ex.getMessage(), null);
         }
@@ -226,10 +241,12 @@ public class HttpClientWrapper {
 
             response.close();
             return result;
-        } catch (NullPointerException nullEx) {
+        } catch (UnknownHostException uheEx) {
+            uheEx.printStackTrace();
             return new Response(
-                    null, null, nullEx, nullEx.getMessage(), null);
+                    null, null, uheEx, uheEx.getMessage(), null);
         } catch (Exception ex) {
+            ex.printStackTrace();
             return new Response(
                     null, null, ex, ex.getMessage(), null);
         }

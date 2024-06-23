@@ -7,9 +7,13 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -72,7 +76,7 @@ public class Utils {
 
         if (response.getStatusCode() < 200 || response.getStatusCode() >= 300)
             throw new Exception(
-                    "Server was return with code " + response.getStatusCode() + ". May be you haven't logged in?");
+                    "Server was return with code " + response.getStatusCode() + ".");
 
         if (response.getContent() == null) {
             throw new Exception("WrapperResponse was returned content is null.");
@@ -120,4 +124,147 @@ public class Utils {
 
         return result;
     }
+
+    public interface JsoupExtraUtils {
+        @Nullable
+        String getValue(Document document);
+
+        @Nullable
+        String getText(Document document);
+
+        @Nullable
+        String getValue(Element element);
+
+        @Nullable
+        String getText(Element document);
+
+        @Nullable
+        Document elementToDocument(Element element);
+
+        @Nullable
+        Integer elementToIntegerOrNull(Element element);
+
+        @Nullable
+        Double elementToDoubleOrNull(Element element);
+
+        @Nullable
+        Element getSelectedValueFromComboBox(Element element);
+
+        @Nullable
+        Element getSelectedValueFromComboBox(Document document);
+
+        String sessionIdToSubCookie(@Nonnull String sessionId);
+    }
+
+    public static final JsoupExtraUtils jsoupExtraUtils = new JsoupExtraUtils() {
+        @Override
+        @Nullable
+        public String getValue(Element element) {
+            try {
+                if (element == null)
+                    return null;
+                return element.val().length() > 0 ? element.val() : null;
+            } catch (Exception ex) {
+                return null;
+            }
+        }
+
+        @Override
+        @Nullable
+        public String getValue(Document document) {
+            if (document == null)
+                return null;
+            return getValue(document.body());
+        }
+
+        @Override
+        @Nullable
+        public String getText(Element element) {
+            try {
+                if (element == null)
+                    return null;
+                return element.text().length() > 0 ? element.text() : null;
+            } catch (Exception ex) {
+                return null;
+            }
+        }
+
+        @Override
+        @Nullable
+        public String getText(Document document) {
+            if (document == null)
+                return null;
+            return getText(document.body());
+        }
+
+        @Override
+        @Nullable
+        public Document elementToDocument(Element element) {
+            if (element == null)
+                return null;
+            return Jsoup.parse(element.html());
+        }
+
+        @Override
+        @Nullable
+        public Integer elementToIntegerOrNull(Element element) {
+            String data = element.text();
+            if (data.isEmpty()) {
+                return null;
+            }
+            try {
+                return Integer.parseInt(data);
+            } catch (Exception ex) {
+                return null;
+            }
+        }
+
+        @Override
+        @Nullable
+        public Double elementToDoubleOrNull(Element element) {
+            String data = element.text();
+            if (data.isEmpty()) {
+                return null;
+            }
+            try {
+                return Double.parseDouble(data);
+            } catch (Exception ex) {
+                return null;
+            }
+        }
+
+        // https://stackoverflow.com/a/22929670
+        @Override
+        @Nullable
+        public Element getSelectedValueFromComboBox(Element element) {
+            Element result = null;
+            if (element != null) {
+                for (Element option : element.children()) {
+                    if (option.hasAttr("selected")) {
+                        result = option;
+                        break;
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        @Override
+        @Nullable
+        public Element getSelectedValueFromComboBox(Document document) {
+            if (document == null)
+                return null;
+            return getSelectedValueFromComboBox(document.body());
+        }
+
+        @Override
+        public String sessionIdToSubCookie(@Nonnull String sessionId) {
+            return String.format(
+                Locale.ROOT,
+                "ASP.NET_SessionId=%s;",
+                sessionId
+            );
+        }
+    };
 }
