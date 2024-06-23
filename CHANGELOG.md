@@ -3,8 +3,10 @@
 This file will list all version log for modified, add or remove function of dutwrapper.
 
 ## 1.10.1
+- [New] We're trying to sync properties serialize name between Java, Net, Python.
 - [Changed] Updated dependencies to latest.
 - [Fixed] `java.net.UnknownHostException` was thrown even you include them in try-catch.
+- [Removed] Removed `NewsGlobalGroupByDate`.
 
 ## 1.10.0
 - `Account.Session` class is now in part of Account class.
