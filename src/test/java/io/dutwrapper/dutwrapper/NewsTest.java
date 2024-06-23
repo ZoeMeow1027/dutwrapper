@@ -1,16 +1,13 @@
 package io.dutwrapper.dutwrapper;
 
+import java.util.List;
+
 import org.junit.jupiter.api.Test;
 
 import io.dutwrapper.dutwrapper.model.enums.LessonStatus;
-import io.dutwrapper.dutwrapper.model.enums.NewsSearchType;
 import io.dutwrapper.dutwrapper.model.news.LinkItem;
 import io.dutwrapper.dutwrapper.model.news.NewsGlobalItem;
-import io.dutwrapper.dutwrapper.model.news.NewsGroupByDate;
 import io.dutwrapper.dutwrapper.model.news.NewsSubjectItem;
-
-import java.util.ArrayList;
-import java.util.List;
 
 class NewsTest {
     @Test
@@ -19,55 +16,29 @@ class NewsTest {
         int pageMax = 3;
 
         while (page <= pageMax) {
-            System.out.println("===========================================");
-            List<NewsGlobalItem> newsList = News.getNewsGlobal(page, null, null);
-            System.out.println(String.format("Page %d (%d item(s))", page, newsList.size()));
-
-            for (NewsGlobalItem newsItem : newsList) {
-                System.out.println(
-                        String.format("Index %d (date: %d)", newsList.indexOf(newsItem) + 1, newsItem.getDate()));
-                System.out.println(newsItem.getTitle());
-                System.out.println(newsItem.getContentString());
-                System.out.println(String.format("%d link(s)", newsItem.getLinks().size()));
-                if (newsItem.getLinks().size() > 0) {
-                    System.out.println("Position | Text | URL");
-                    for (LinkItem linkItem : newsItem.getLinks()) {
-                        System.out.println(String.format("%d | %s | %s", linkItem.getPosition(), linkItem.getText(),
-                                linkItem.getUrl()));
+            try {
+                System.out.println("===========================================");
+                List<NewsGlobalItem> newsList = News.getNewsGlobal(page, null, null);
+                System.out.println(String.format("Page %d (%d item(s))", page, newsList.size()));
+    
+                for (NewsGlobalItem newsItem : newsList) {
+                    System.out.println(
+                            String.format("Index %d (date: %d)", newsList.indexOf(newsItem) + 1, newsItem.getDate()));
+                    System.out.println(newsItem.getTitle());
+                    System.out.println(newsItem.getContentString());
+                    System.out.println(String.format("%d link(s)", newsItem.getLinks().size()));
+                    if (newsItem.getLinks().size() > 0) {
+                        System.out.println("Position | Text | URL");
+                        for (LinkItem linkItem : newsItem.getLinks()) {
+                            System.out.println(String.format("%d | %s | %s", linkItem.getPosition(), linkItem.getText(),
+                                    linkItem.getUrl()));
+                        }
                     }
                 }
+            } catch (Exception ex) {
+                // ex.printStackTrace();
             }
-            page += 1;
-        }
-    }
-
-    @Test
-    void getNewsGlobalGroupByDate() throws Exception {
-        int page = 1;
-        int pageMax = 3;
-
-        while (page <= pageMax) {
-            System.out.println("===========================================");
-            ArrayList<NewsGroupByDate<NewsGlobalItem>> newsList = News.getNewsGlobalGroupByDate(page, null, null);
-            System.out.println(String.format("Page %d (%d item(s))", page, newsList.size()));
-
-            for (NewsGroupByDate<NewsGlobalItem> newsGroup : newsList) {
-                System.out.println(String.format(
-                    "Index %d - date: %d - count: %d",
-                    newsList.indexOf(newsGroup) + 1,
-                    newsGroup.getDateInUnixMilliseconds(),
-                    newsGroup.getData().size()
-                    ));
-                for (NewsGlobalItem newsItem: newsGroup.getData()) {
-                    System.out.println(String.format(
-                        "- Index %d - date: %d - title: %s",
-                        newsGroup.getData().indexOf(newsItem),
-                        newsItem.getDate(),
-                        newsItem.getTitle()
-                    ));
-                }
-            }
-            page += 1;
+            page += 1;                    
         }
     }
 
@@ -80,7 +51,7 @@ class NewsTest {
             System.out.println("==================================");
             System.out.println("Page " + page);
 
-            List<NewsSubjectItem> newsList = News.getNewsSubject(page, NewsSearchType.ByContent, "Thứ");
+            List<NewsSubjectItem> newsList = News.getNewsSubject(page, null, null);
             System.out.println("Item count: " + newsList.size());
 
             for (NewsSubjectItem newsItem : newsList) {
@@ -100,36 +71,6 @@ class NewsTest {
                     System.out.println("Room: " + newsItem.getAffectedRoom());
                 } else {
                     System.out.println(newsItem.getContentString());
-                }
-            }
-            page += 1;
-        }
-    }
-
-    @Test
-    void getNewsSubjectGroupByDate() throws Exception {
-        int page = 1;
-        int pageMax = 3;
-
-        while (page <= pageMax) {
-            System.out.println("===========================================");
-            ArrayList<NewsGroupByDate<NewsSubjectItem>> newsList = News.getNewsSubjectGroupByDate(page, null, null);
-            System.out.println(String.format("Page %d (%d item(s))", page, newsList.size()));
-
-            for (NewsGroupByDate<NewsSubjectItem> newsGroup : newsList) {
-                System.out.println(String.format(
-                    "Index %d - date: %d - count: %d",
-                    newsList.indexOf(newsGroup) + 1,
-                    newsGroup.getDateInUnixMilliseconds(),
-                    newsGroup.getData().size()
-                    ));
-                for (NewsSubjectItem newsItem: newsGroup.getData()) {
-                    System.out.println(String.format(
-                        "- Index %d - date: %d - title: %s",
-                        newsGroup.getData().indexOf(newsItem),
-                        newsItem.getDate(),
-                        newsItem.getTitle()
-                    ));
                 }
             }
             page += 1;

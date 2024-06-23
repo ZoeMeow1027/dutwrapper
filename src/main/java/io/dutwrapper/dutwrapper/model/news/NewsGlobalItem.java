@@ -3,11 +3,18 @@ package io.dutwrapper.dutwrapper.model.news;
 import java.io.Serializable;
 import java.util.ArrayList;
 
+import com.google.gson.annotations.SerializedName;
+
 public class NewsGlobalItem implements Serializable {
+    @SerializedName("title")
     private String title;
+    @SerializedName("content")
     private String content;
+    @SerializedName("content_string")
     private String contentString;
+    @SerializedName("date")
     private Long date;
+    @SerializedName("links")
     private ArrayList<LinkItem> links;
 
     public NewsGlobalItem() {

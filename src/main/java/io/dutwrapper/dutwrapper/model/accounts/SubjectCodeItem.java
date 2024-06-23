@@ -3,15 +3,21 @@ package io.dutwrapper.dutwrapper.model.accounts;
 import java.io.Serializable;
 import java.util.Objects;
 
+import com.google.gson.annotations.SerializedName;
+
 // Details in http://daotao.dut.udn.vn/download2/Guide_Dangkyhoc.pdf, page 28
 public class SubjectCodeItem implements Serializable {
     // Area 1
+    @SerializedName("subjectid")
     private String subjectId = "";
     // Area 2
+    @SerializedName("schoolyearid")
     private String schoolYearId = "";
     // Area 3
+    @SerializedName("studentyearid")
     private String studentYearId = "";
     // Area 4
+    @SerializedName("classid")
     private String classId = "";
 
     public SubjectCodeItem() {

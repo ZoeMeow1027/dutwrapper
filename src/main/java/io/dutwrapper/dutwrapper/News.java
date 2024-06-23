@@ -1,5 +1,23 @@
 package io.dutwrapper.dutwrapper;
 
+import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Locale;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
+import javax.annotation.Nullable;
+
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -11,34 +29,17 @@ import io.dutwrapper.dutwrapper.model.enums.LessonStatus;
 import io.dutwrapper.dutwrapper.model.enums.NewsSearchType;
 import io.dutwrapper.dutwrapper.model.enums.NewsType;
 import io.dutwrapper.dutwrapper.model.news.LinkItem;
-import io.dutwrapper.dutwrapper.model.news.NewsGlobalGroupByDate;
 import io.dutwrapper.dutwrapper.model.news.NewsGlobalItem;
-import io.dutwrapper.dutwrapper.model.news.NewsGroupByDate;
 import io.dutwrapper.dutwrapper.model.news.NewsSubjectAffectedItem;
-import io.dutwrapper.dutwrapper.model.news.NewsSubjectGroupByDate;
 import io.dutwrapper.dutwrapper.model.news.NewsSubjectItem;
-
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
-import java.util.*;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
-import javax.annotation.Nullable;
 
 @SuppressWarnings("SpellCheckingInspection")
 public class News {
-    @SuppressWarnings("null")
     public static ArrayList<NewsGlobalItem> getNews(
             @Nullable NewsType newsType,
             @Nullable Integer page,
             @Nullable NewsSearchType searchType,
-            @Nullable String searchQuery) throws Exception {
+            @Nullable String searchQuery) throws Exception, IOException {
         String url = String.format(
                 Variables.URL_NEWS,
                 newsType == null ? NewsType.Global.toString() : newsType.toString(),
@@ -47,9 +48,7 @@ public class News {
                 URLEncoder.encode(searchQuery == null ? "" : searchQuery, StandardCharsets.UTF_8.toString()));
 
         HttpClientWrapper.Response response = HttpClientWrapper.get(url, null, 60);
-        if (response.getException() != null) {
-            throw response.getException();
-        }
+        response.throwExceptionIfExist();
 
         if (response.getStatusCode() < 200 || response.getStatusCode() >= 300) {
             throw new Exception("Server was returned with code " + response.getStatusCode() + ".");
@@ -250,51 +249,5 @@ public class News {
         }
 
         return data2;
-    }
-
-    public static ArrayList<NewsGroupByDate<NewsGlobalItem>> getNewsGlobalGroupByDate(
-            @Nullable Integer page,
-            @Nullable NewsSearchType searchType,
-            @Nullable String searchQuery) throws Exception {
-        ArrayList<NewsGroupByDate<NewsGlobalItem>> _result = new ArrayList<>();
-        ArrayList<NewsGlobalItem> _temp = getNewsGlobal(page, searchType, searchQuery);
-
-        for (NewsGlobalItem item : _temp) {
-            if (_result.stream().anyMatch(p -> p.getDateInUnixMilliseconds() == item.getDate())) {
-                // if date group exist
-                _result.stream().filter(p -> p.getDateInUnixMilliseconds() == item.getDate()).findFirst().get()
-                        .addData(item);
-            } else {
-                // if not
-                NewsGroupByDate<NewsGlobalItem> group = new NewsGlobalGroupByDate(item.getDate());
-                group.addData(item);
-                _result.add(group);
-            }
-        }
-
-        return _result;
-    }
-
-    public static ArrayList<NewsGroupByDate<NewsSubjectItem>> getNewsSubjectGroupByDate(
-            @Nullable Integer page,
-            @Nullable NewsSearchType searchType,
-            @Nullable String searchQuery) throws Exception {
-        ArrayList<NewsGroupByDate<NewsSubjectItem>> _result = new ArrayList<>();
-        ArrayList<NewsSubjectItem> _temp = getNewsSubject(page, searchType, searchQuery);
-
-        for (NewsSubjectItem item : _temp) {
-            if (_result.stream().anyMatch(p -> p.getDateInUnixMilliseconds() == item.getDate())) {
-                // if date group exist
-                _result.stream().filter(p -> p.getDateInUnixMilliseconds() == item.getDate()).findFirst().get()
-                        .addData(item);
-            } else {
-                // if not
-                NewsGroupByDate<NewsSubjectItem> group = new NewsSubjectGroupByDate(item.getDate());
-                group.addData(item);
-                _result.add(group);
-            }
-        }
-
-        return _result;
     }
 }

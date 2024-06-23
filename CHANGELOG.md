@@ -2,6 +2,10 @@
 
 This file will list all version log for modified, add or remove function of dutwrapper.
 
+## 1.10.1
+- [Changed] Updated dependencies to latest.
+- [Fixed] `java.net.UnknownHostException` was thrown even you include them in try-catch.
+
 ## 1.10.0
 - `Account.Session` class is now in part of Account class.
   - This will ensure you can get `__VIEWSTATE` automatically to session (just use `Account.Session`, that's it).

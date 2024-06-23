@@ -2,16 +2,25 @@ package io.dutwrapper.dutwrapper.model.news;
 
 import java.util.ArrayList;
 
+import com.google.gson.annotations.SerializedName;
+
 import io.dutwrapper.dutwrapper.model.accounts.LessonItem;
 import io.dutwrapper.dutwrapper.model.enums.LessonStatus;
 
 public class NewsSubjectItem extends NewsGlobalItem {
+    @SerializedName("affected_class")
     private ArrayList<NewsSubjectAffectedItem> affectedClass = new ArrayList<>();
+    @SerializedName("affected_date")
     private Long affectedDate = 0L;
+    @SerializedName("status")
     private LessonStatus lessonStatus = LessonStatus.Unknown;
+    @SerializedName("affected_lessons")
     private LessonItem affectedLesson;
+    @SerializedName("makeup_room")
     private String affectedRoom;
+    @SerializedName("lecturer_name")
     private String lecturerName = "";
+    @SerializedName("lecturer_gender")
     private Boolean lecturerGender = false;
 
     public Long getAffectedDate() {
