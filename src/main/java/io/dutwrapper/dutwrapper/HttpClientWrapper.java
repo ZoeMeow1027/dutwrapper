@@ -13,6 +13,12 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 
 public class HttpClientWrapper {
+    private static boolean _showDebugLog = false;
+
+    public static void showDebugLog(boolean enabled) {
+        _showDebugLog = enabled;
+    }
+
     public static class Header {
         private String name;
         private String value;
@@ -138,10 +144,14 @@ public class HttpClientWrapper {
             throw new Exception("Not found session id in cookie!");
             // https://stackoverflow.com/questions/4959859/why-is-unknownhostexception-not-caught-in-exception-java
         } catch (UnknownHostException uheEx) {
-            uheEx.printStackTrace();
+            if (_showDebugLog) {
+                uheEx.printStackTrace();
+            }
             return null;
         } catch (Exception ex) {
-            ex.printStackTrace();
+            if (_showDebugLog) {
+                ex.printStackTrace();
+            }
             return null;
         }
     }
@@ -185,14 +195,21 @@ public class HttpClientWrapper {
             response.close();
             return result;
         } catch (NullPointerException nullEx) {
+            if (_showDebugLog) {
+                nullEx.printStackTrace();
+            }
             return new Response(
                     null, null, nullEx, nullEx.getMessage(), null);
         } catch (UnknownHostException uheEx) {
-            uheEx.printStackTrace();
+            if (_showDebugLog) { 
+                uheEx.printStackTrace();
+            }
             return new Response(
                     null, null, uheEx, uheEx.getMessage(), null);
         } catch (Exception ex) {
-            ex.printStackTrace();
+            if (_showDebugLog) {
+                ex.printStackTrace();
+            }
             return new Response(
                     null, null, ex, ex.getMessage(), null);
         }
@@ -242,11 +259,15 @@ public class HttpClientWrapper {
             response.close();
             return result;
         } catch (UnknownHostException uheEx) {
-            uheEx.printStackTrace();
+            if (_showDebugLog) {                
+                uheEx.printStackTrace();
+            }
             return new Response(
                     null, null, uheEx, uheEx.getMessage(), null);
         } catch (Exception ex) {
-            ex.printStackTrace();
+            if (_showDebugLog) {
+                ex.printStackTrace();
+            }
             return new Response(
                     null, null, ex, ex.getMessage(), null);
         }
