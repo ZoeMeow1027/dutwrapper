@@ -2,6 +2,12 @@
 
 This file will list all version log for modified, add or remove function of dutwrapper.
 
+## 1.10.2
+- Merge all class related to News into once.
+- Merge all class related to Utils into once.
+- SetPrintStackTrace in HttpClientWrapper has been moved to `Variables` class.
+- Updated Gradle to 8.9 and all dependencies to latest.
+
 ## 1.10.1
 - [New] We're trying to sync properties serialize name between Java, Net, Python.
 - [Changed] Updated dependencies to latest.

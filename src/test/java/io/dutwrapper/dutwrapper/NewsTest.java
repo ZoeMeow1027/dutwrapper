@@ -2,25 +2,26 @@ package io.dutwrapper.dutwrapper;
 
 import java.util.List;
 
+import com.google.gson.GsonBuilder;
 import org.junit.jupiter.api.Test;
 
 import com.google.gson.Gson;
 
-import io.dutwrapper.dutwrapper.model.news.NewsGlobalItem;
-import io.dutwrapper.dutwrapper.model.news.NewsSubjectItem;
-
+@SuppressWarnings("CallToPrintStackTrace")
 class NewsTest {
     @Test
-    void getNewsGlobal() throws Exception {
+    void getNewsGlobal() {
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+
         int page = 1;
         int pageMax = 3;
 
         while (page <= pageMax) {
             try {
-                System.out.println(String.format("[News] [News Global] Page %d", page));    
-                List<NewsGlobalItem> newsList = News.getNewsGlobal(page, null, null);
-                System.out.println(String.format("%d item(s))", newsList.size()));
-                System.out.println(new Gson().toJson(newsList));
+                System.out.printf("[News] [News Global] Page %d%n", page);
+                List<News.NewsItem> newsList = News.getNewsGlobal(page, null, null);
+                System.out.printf("%d item(s))%n", newsList.size());
+                System.out.println(gson.toJson(newsList));
                 System.out.println("\n");
             } catch (Exception ex) {
                 ex.printStackTrace();
@@ -30,16 +31,18 @@ class NewsTest {
     }
 
     @Test
-    void getNewsSubject() throws Exception {
+    void getNewsSubject() {
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+
         int page = 1;
         int pageMax = 3;
 
         while (page <= pageMax) {
             try {
-                System.out.println(String.format("[News] [News Subject] Page %d", page));    
-                List<NewsSubjectItem> newsList = News.getNewsSubject(page, null, null);
-                System.out.println(String.format("%d item(s))", newsList.size()));
-                System.out.println(new Gson().toJson(newsList));
+                System.out.printf("[News] [News Subject] Page %d%n", page);
+                List<News.NewsSubjectItem> newsList = News.getNewsSubject(page, null, null);
+                System.out.printf("%d item(s))%n", newsList.size());
+                System.out.println(gson.toJson(newsList));
                 System.out.println("\n");
             } catch (Exception ex) {
                 ex.printStackTrace();

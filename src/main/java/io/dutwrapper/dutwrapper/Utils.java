@@ -1,14 +1,11 @@
 package io.dutwrapper.dutwrapper;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -20,11 +17,49 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import io.dutwrapper.dutwrapper.model.utils.DutSchoolYearItem;
-
 public class Utils {
-    public static Long getCurrentTimeInUnix() {
-        return System.currentTimeMillis();
+    public static class DutSchoolYearItem {
+        Integer week;
+        String schoolYear;
+        Integer schoolYearVal;
+
+        public DutSchoolYearItem() {
+        }
+
+        public DutSchoolYearItem(Integer week, String schoolYear, Integer schoolYearVal) {
+            this.week = week;
+            this.schoolYear = schoolYear;
+            this.schoolYearVal = schoolYearVal;
+        }
+
+        public Integer getWeek() {
+            return week;
+        }
+
+        public void setWeek(Integer week) {
+            this.week = week;
+        }
+
+        public String getSchoolYear() {
+            return schoolYear;
+        }
+
+        public void setSchoolYear(String schoolYear) {
+            this.schoolYear = schoolYear;
+        }
+
+        public Integer getSchoolYearVal() {
+            return schoolYearVal;
+        }
+
+        public void setSchoolYearVal(Integer schoolYearVal) {
+            this.schoolYearVal = schoolYearVal;
+        }
+
+        @Override
+        public String toString() {
+            return String.format("School year: %s\nSchool year value: %d\nWeek %s", getSchoolYear(), getSchoolYearVal(), getWeek());
+        }
     }
 
     public static String findFirstString(String test, String regex) {
@@ -35,22 +70,6 @@ public class Utils {
         } else {
             return null;
         }
-    }
-
-    public static byte[] toUrlEncode(Map<String, String> map, String charsetName) throws UnsupportedEncodingException {
-        String request = "";
-
-        Boolean first = true;
-
-        for (String key : map.keySet()) {
-            request += String.format(
-                    "%s%s=%s",
-                    first ? "&" : "",
-                    URLEncoder.encode(key, "UTF-8"),
-                    URLEncoder.encode(map.get(key), "UTF-8"));
-        }
-
-        return request.getBytes(charsetName);
     }
 
     public static Long date2UnixTimestamp(String input) {
@@ -67,9 +86,8 @@ public class Utils {
         return date;
     }
 
-    @SuppressWarnings("null")
     public static DutSchoolYearItem getCurrentSchoolWeek() throws Exception {
-        HttpClientWrapper.Response response = HttpClientWrapper.get(Variables.URL_SCHOOLCURRENTWEEK, null, 60);
+        HttpClientWrapper.Response response = HttpClientWrapper.get(Variables.URL_MAIN_SCHOOLCURRENTWEEK, null, 60);
         if (response.getException() != null) {
             throw response.getException();
         }
@@ -87,9 +105,9 @@ public class Utils {
         // Get all and set 'selected' tag in school year list.
         Elements yearList = webData.getElementById("dnn_ctr442_View_cboNamhoc").getElementsByTag("option");
         yearList.sort((s1, s2) -> {
-            Integer v1 = Integer.parseInt(s1.val()), v2 = Integer.parseInt(s2.val());
+            int v1 = Integer.parseInt(s1.val()), v2 = Integer.parseInt(s2.val());
 
-            return (v1 < v2) ? 1 : (v1 > v2) ? -1 : 0;
+            return Integer.compare(v2, v1);
         });
         for (Element yearItem : yearList) {
             if (yearItem.hasAttr("selected")) {
@@ -102,14 +120,14 @@ public class Utils {
         // Get all and set 'selected' tag in week list.
         Elements weekList = webData.getElementById("dnn_ctr442_View_cboTuan").getElementsByTag("option");
         weekList.sort((s1, s2) -> {
-            Integer v1 = Integer.parseInt(s1.val()), v2 = Integer.parseInt(s2.val());
+            int v1 = Integer.parseInt(s1.val()), v2 = Integer.parseInt(s2.val());
 
-            return (v1 < v2) ? 1 : (v1 > v2) ? -1 : 0;
+            return Integer.compare(v2, v1);
         });
         for (Element weekItem : weekList) {
             if (weekItem.hasAttr("selected")) {
                 Pattern pattern = Pattern.compile(
-                        "Tuần thứ (\\d{1,2}): (\\d{1,2}\\/\\d{1,2}\\/\\d{4})",
+                        "Tuần thứ (\\d{1,2}): (\\d{1,2}/\\d{1,2}/\\d{4})",
                         Pattern.CASE_INSENSITIVE);
                 Matcher matcher = pattern.matcher(weekItem.text());
                 if (matcher.find()) {
@@ -163,7 +181,7 @@ public class Utils {
             try {
                 if (element == null)
                     return null;
-                return element.val().length() > 0 ? element.val() : null;
+                return !element.val().isEmpty() ? element.val() : null;
             } catch (Exception ex) {
                 return null;
             }
@@ -183,7 +201,7 @@ public class Utils {
             try {
                 if (element == null)
                     return null;
-                return element.text().length() > 0 ? element.text() : null;
+                return !element.text().isEmpty() ? element.text() : null;
             } catch (Exception ex) {
                 return null;
             }
