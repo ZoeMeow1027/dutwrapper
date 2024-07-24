@@ -6,10 +6,6 @@ public class WeekItem implements Serializable {
     private Integer start;
     private Integer end;
 
-    public WeekItem() {
-
-    }
-
     public WeekItem(Integer start, Integer end) {
         this.start = start;
         this.end = end;

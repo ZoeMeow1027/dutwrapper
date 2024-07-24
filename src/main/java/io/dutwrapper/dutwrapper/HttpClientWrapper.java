@@ -1,8 +1,11 @@
 package io.dutwrapper.dutwrapper;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.net.UnknownHostException;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Nullable;
@@ -12,6 +15,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 
+@SuppressWarnings("CallToPrintStackTrace")
 public class HttpClientWrapper {
     public static class Header {
         private String name;
@@ -75,7 +79,7 @@ public class HttpClientWrapper {
             return content;
         }
 
-        public void setContent(String content) {
+        public void setContent(@Nullable String content) {
             this.content = content;
         }
 
@@ -83,7 +87,7 @@ public class HttpClientWrapper {
             return exception;
         }
 
-        public void setException(Exception exception) {
+        public void setException(@Nullable Exception exception) {
             this.exception = exception;
         }
 
@@ -91,7 +95,7 @@ public class HttpClientWrapper {
             return message;
         }
 
-        public void setMessage(String message) {
+        public void setMessage(@Nullable String message) {
             this.message = message;
         }
 
@@ -99,7 +103,7 @@ public class HttpClientWrapper {
             return sessionId;
         }
 
-        public void setSessionId(String sessionId) {
+        public void setSessionId(@Nullable String sessionId) {
             this.sessionId = sessionId;
         }
 
@@ -138,10 +142,14 @@ public class HttpClientWrapper {
             throw new Exception("Not found session id in cookie!");
             // https://stackoverflow.com/questions/4959859/why-is-unknownhostexception-not-caught-in-exception-java
         } catch (UnknownHostException uheEx) {
-            uheEx.printStackTrace();
+            if (Variables.getShowDebugLogStatus()) {
+                uheEx.printStackTrace();
+            }
             return null;
         } catch (Exception ex) {
-            ex.printStackTrace();
+            if (Variables.getShowDebugLogStatus()) {
+                ex.printStackTrace();
+            }
             return null;
         }
     }
@@ -185,14 +193,21 @@ public class HttpClientWrapper {
             response.close();
             return result;
         } catch (NullPointerException nullEx) {
+            if (Variables.getShowDebugLogStatus()) {
+                nullEx.printStackTrace();
+            }
             return new Response(
                     null, null, nullEx, nullEx.getMessage(), null);
         } catch (UnknownHostException uheEx) {
-            uheEx.printStackTrace();
+            if (Variables.getShowDebugLogStatus()) {
+                uheEx.printStackTrace();
+            }
             return new Response(
                     null, null, uheEx, uheEx.getMessage(), null);
         } catch (Exception ex) {
-            ex.printStackTrace();
+            if (Variables.getShowDebugLogStatus()) {
+                ex.printStackTrace();
+            }
             return new Response(
                     null, null, ex, ex.getMessage(), null);
         }
@@ -242,13 +257,32 @@ public class HttpClientWrapper {
             response.close();
             return result;
         } catch (UnknownHostException uheEx) {
-            uheEx.printStackTrace();
+            if (Variables.getShowDebugLogStatus()) {
+                uheEx.printStackTrace();
+            }
             return new Response(
                     null, null, uheEx, uheEx.getMessage(), null);
         } catch (Exception ex) {
-            ex.printStackTrace();
+            if (Variables.getShowDebugLogStatus()) {
+                ex.printStackTrace();
+            }
             return new Response(
                     null, null, ex, ex.getMessage(), null);
         }
+    }
+
+    public static byte[] toUrlEncode(Map<String, String> map, String charsetName) throws UnsupportedEncodingException {
+        StringBuilder request = new StringBuilder();
+
+        for (String key : map.keySet()) {
+            request.append(String.format(
+                    "%s%s=%s",
+                    request.length() != 0 ? "&" : "",
+                    URLEncoder.encode(key, "UTF-8"),
+                    URLEncoder.encode(map.get(key), "UTF-8")
+            ));
+        }
+
+        return request.toString().getBytes(charsetName);
     }
 }

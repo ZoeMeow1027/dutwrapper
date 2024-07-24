@@ -1,6 +1,5 @@
 package io.dutwrapper.dutwrapper;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
@@ -31,20 +30,20 @@ import io.dutwrapper.dutwrapper.model.accounts.trainingresult.GraduateStatus;
 import io.dutwrapper.dutwrapper.model.accounts.trainingresult.SubjectResult;
 import io.dutwrapper.dutwrapper.model.accounts.trainingresult.TrainingSummary;
 
+@SuppressWarnings("CallToPrintStackTrace")
 public class Account {
     public static class AuthInfo {
         @Nullable
-        String username = null;
+        String username;
         @Nullable
-        String password = null;
+        String password;
 
         public AuthInfo(@Nullable String username, @Nullable String password) {
             this.username = username;
             this.password = password;
         }
 
-        @SuppressWarnings("null")
-        public boolean isVaildAuth() {
+        public boolean isValidAuth() {
             // Check username
             if (username == null)
                 return false;
@@ -70,14 +69,14 @@ public class Account {
 
     public static class Session {
         @Nullable
-        String sessionId = null;
+        String sessionId;
         @Nullable
-        String viewState = null;
+        String viewState;
         @Nullable
-        String viewStateGenerator = null;
+        String viewStateGenerator;
 
         public Session(@Nullable String sessionId, @Nullable String viewState,
-                @Nullable String viewStateGenerator) {
+                       @Nullable String viewStateGenerator) {
             this.sessionId = sessionId;
             this.viewState = viewState;
             this.viewStateGenerator = viewStateGenerator;
@@ -95,15 +94,14 @@ public class Account {
             return viewStateGenerator;
         }
 
-        public boolean isVaildSession() {
+        public boolean isValidSession() {
             return (sessionId != null) && (viewState != null)
                     && (viewStateGenerator != null);
         }
     }
 
-    @SuppressWarnings("null")
-    public static Session getSession() throws IOException, Exception {
-        HttpClientWrapper.Response get = HttpClientWrapper.get(Variables.URL_LOGIN, null, 60);
+    public static Session getSession() throws Exception {
+        HttpClientWrapper.Response get = HttpClientWrapper.get(Variables.URL_SV_LOGIN, null, 60);
         if (get.getException() != null) {
             throw get.getException();
         }
@@ -111,24 +109,29 @@ public class Account {
             throw new Exception(
                     String.format("Request not successful: Web returned with code %d", get.getStatusCode()));
         }
-        Session session = new Session(get.getSessionId(), null, null);
-        if (get.getContent() != null) {
-            try {
-                Document webData = Jsoup.parse(get.getContent());
-                session = new Session(
-                        session.getSessionId(),
-                        webData.getElementById("__VIEWSTATE").val(),
-                        webData.getElementById("__VIEWSTATEGENERATOR").val());
-            } catch (Exception ex) {
+        try {
+            if (get.getContent() == null) {
+                throw new Exception("No content here! Can't get session!");
             }
+
+            Document webData = Jsoup.parse(get.getContent());
+            return new Session(
+                    get.getSessionId(),
+                    Utils.jsoupExtraUtils.getValue(webData.getElementById("__VIEWSTATE")),
+                    Utils.jsoupExtraUtils.getValue(webData.getElementById("__VIEWSTATEGENERATOR"))
+            );
+        } catch (Exception ex) {
+            if (Variables.getShowDebugLogStatus()) {
+                ex.printStackTrace();
+            }
+            return new Session(get.getSessionId(), null, null);
         }
-        return session;
     }
 
-    @SuppressWarnings("null")
     public static void login(@Nonnull Session session, @Nonnull AuthInfo auth) throws Exception {
-        if (!session.isVaildSession())
-            throw new Exception("Invaild session!");
+        if (!session.isValidSession()) {
+            throw new Exception("Invalid session!");
+        }
 
         Map<String, String> data = new HashMap<String, String>();
         data.put("__VIEWSTATE", session.getViewState());
@@ -142,22 +145,21 @@ public class Account {
                         Utils.jsoupExtraUtils.sessionIdToSubCookie(session.getSessionId()))));
 
         HttpClientWrapper.post(
-                Variables.URL_LOGIN,
-                Utils.toUrlEncode(data, "UTF-8"),
+                Variables.URL_SV_LOGIN,
+                HttpClientWrapper.toUrlEncode(data, "UTF-8"),
                 headers,
                 60);
     }
 
-    @SuppressWarnings("null")
     public static boolean isLoggedIn(@Nonnull Session session) throws Exception {
-        if (!session.isVaildSession())
-            throw new Exception("Invaild session!");
+        if (!session.isValidSession())
+            throw new Exception("Invalid session!");
 
         List<HttpClientWrapper.Header> headers = new ArrayList<>(Arrays.asList(
                 new HttpClientWrapper.Header("Cookie",
                         Utils.jsoupExtraUtils.sessionIdToSubCookie(session.getSessionId()))));
 
-        HttpClientWrapper.Response response = HttpClientWrapper.get(Variables.URL_CHECKLOGGEDIN, headers, 60);
+        HttpClientWrapper.Response response = HttpClientWrapper.get(Variables.URL_SV_CHECKLOGGEDIN, headers, 60);
 
         if (response.getException() != null) {
             throw response.getException();
@@ -166,24 +168,22 @@ public class Account {
         return response.getStatusCode() >= 200 && response.getStatusCode() < 300;
     }
 
-    @SuppressWarnings("null")
     public static void logout(@Nonnull Session session) throws Exception {
-        if (!session.isVaildSession())
-            throw new Exception("Invaild session!");
+        if (!session.isValidSession())
+            throw new Exception("Invalid session!");
 
         List<HttpClientWrapper.Header> headers = new ArrayList<>(Arrays.asList(
                 new HttpClientWrapper.Header("Cookie",
                         Utils.jsoupExtraUtils.sessionIdToSubCookie(session.getSessionId()))));
 
-        HttpClientWrapper.get(Variables.URL_LOGOUT, headers, 60);
+        HttpClientWrapper.get(Variables.URL_SV_LOGOUT, headers, 60);
     }
 
-    @SuppressWarnings("null")
     public static ArrayList<SubjectScheduleItem> fetchSubjectSchedule(@Nonnull Session session, @Nonnull Integer year,
-            @Nonnull Integer semester)
+                                                                      @Nonnull Integer semester)
             throws Exception {
-        if (!session.isVaildSession())
-            throw new Exception("Invaild session!");
+        if (!session.isValidSession())
+            throw new Exception("Invalid session!");
 
         if (!isLoggedIn(session)) {
             throw new Exception(
@@ -194,10 +194,10 @@ public class Account {
         switch (semester) {
             case 1:
             case 2:
-                url = String.format(Variables.URL_SUBJECTSCHEDULE, year, semester, 0);
+                url = String.format(Variables.URL_SV_SUBJECTINFORMATION, year, semester, 0);
                 break;
             case 3:
-                url = String.format(Variables.URL_SUBJECTSCHEDULE, year, semester - 1, 1);
+                url = String.format(Variables.URL_SV_SUBJECTINFORMATION, year, semester - 1, 1);
                 break;
             default:
                 throw new Exception("Invalid semester!");
@@ -233,7 +233,7 @@ public class Account {
         Element schStudy = webData.getElementById("TTKB_GridInfo");
         if (schStudy != null) {
             Elements schStudyList = schStudy.getElementsByClass("GridRow");
-            if (schStudyList.size() > 0) {
+            if (!schStudyList.isEmpty()) {
                 for (Element row : schStudyList) {
                     Elements cellList = row.getElementsByClass("GridCell");
 
@@ -281,9 +281,10 @@ public class Account {
                     if (!cellList.get(8).text().isEmpty()) {
                         String[] cellSplit = cellList.get(8).text().split(";");
                         for (String cellSplitItem : cellSplit) {
-                            WeekItem weekItem = new WeekItem();
-                            weekItem.setStart(Integer.parseInt(cellSplitItem.split("-")[0]));
-                            weekItem.setEnd(Integer.parseInt(cellSplitItem.split("-")[1]));
+                            WeekItem weekItem = new WeekItem(
+                                    Integer.parseInt(cellSplitItem.split("-")[0]),
+                                    Integer.parseInt(cellSplitItem.split("-")[1])
+                            );
                             scheduleStudy.getWeekList().add(weekItem);
                         }
                     }
@@ -304,7 +305,7 @@ public class Account {
         Element schExam = webData.getElementById("TTKB_GridLT");
         if (schExam != null) {
             Elements schExamList = schExam.getElementsByClass("GridRow");
-            if (schExamList.size() > 0) {
+            if (!schExamList.isEmpty()) {
                 for (Element row : schExamList) {
                     Elements cellList = row.getElementsByClass("GridCell");
 
@@ -325,37 +326,40 @@ public class Account {
                         scheduleExam.setIsGlobal(cellList.get(4).attr("class").contains("GridCheck"));
                         // Date + Room
                         String temp = cellList.get(5).text();
-                        String[] tempSplitted = temp.split(", ");
+                        String[] tempSplitList = temp.split(", ");
                         LocalDateTime localDateTime = LocalDateTime.of(2000, 1, 1, 0, 0);
-                        for (String tempSplittedItem : tempSplitted) {
-                            String[] itemSplitted = tempSplittedItem.split(": ");
-                            if (itemSplitted.length < 2)
+                        for (String tempSplitItem : tempSplitList) {
+                            String[] itemSplit = tempSplitItem.split(": ");
+                            if (itemSplit.length < 2)
                                 continue;
 
                             // Area for day
-                            if (tempSplittedItem.contains("Ngày")) {
+                            if (tempSplitItem.contains("Ngày")) {
                                 try {
-                                    String[] dateSplitted = itemSplitted[1].split("/");
+                                    String[] dateSplit = itemSplit[1].split("/");
                                     localDateTime = LocalDateTime.of(
-                                            Integer.parseInt(dateSplitted[2]),
-                                            Integer.parseInt(dateSplitted[1]),
-                                            Integer.parseInt(dateSplitted[0]),
+                                            Integer.parseInt(dateSplit[2]),
+                                            Integer.parseInt(dateSplit[1]),
+                                            Integer.parseInt(dateSplit[0]),
                                             0, 0, 0);
                                 } catch (Exception ex) {
-                                    ex.printStackTrace();
+                                    if (Variables.getShowDebugLogStatus()) {
+                                        //noinspection CallToPrintStackTrace
+                                        ex.printStackTrace();
+                                    }
                                 }
                             }
                             // Area for room
-                            else if (tempSplittedItem.contains("Phòng")) {
-                                scheduleExam.setRoom(itemSplitted[1]);
+                            else if (tempSplitItem.contains("Phòng")) {
+                                scheduleExam.setRoom(itemSplit[1]);
                             }
                             // Area for hours
-                            else if (tempSplittedItem.contains("Giờ")) {
-                                String[] timeSplitted = itemSplitted[1].split("h");
-                                if (timeSplitted.length > 0)
-                                    localDateTime = localDateTime.plusHours(Integer.parseInt(timeSplitted[0]) - 7);
-                                if (timeSplitted.length > 1)
-                                    localDateTime = localDateTime.plusMinutes(Integer.parseInt(timeSplitted[1]));
+                            else if (tempSplitItem.contains("Giờ")) {
+                                String[] timeSplit = itemSplit[1].split("h");
+                                if (timeSplit.length > 0)
+                                    localDateTime = localDateTime.plusHours(Integer.parseInt(timeSplit[0]) - 7);
+                                if (timeSplit.length > 1)
+                                    localDateTime = localDateTime.plusMinutes(Integer.parseInt(timeSplit[1]));
                             }
                         }
                         // Set date
@@ -369,12 +373,11 @@ public class Account {
         return result;
     }
 
-    @SuppressWarnings("null")
     public static ArrayList<SubjectFeeItem> fetchSubjectFee(@Nonnull Session session, @Nonnull Integer year,
-            @Nonnull Integer semester)
+                                                            @Nonnull Integer semester)
             throws Exception {
-        if (!session.isVaildSession())
-            throw new Exception("Invaild session!");
+        if (!session.isValidSession())
+            throw new Exception("Invalid session!");
 
         if (!isLoggedIn(session)) {
             throw new Exception(
@@ -385,10 +388,10 @@ public class Account {
         switch (semester) {
             case 1:
             case 2:
-                url = String.format(Variables.URL_SUBJECTFEE, year, semester, 0);
+                url = String.format(Variables.URL_SV_SUBJECTFEE, year, semester, 0);
                 break;
             case 3:
-                url = String.format(Variables.URL_SUBJECTFEE, year, semester - 1, 1);
+                url = String.format(Variables.URL_SV_SUBJECTFEE, year, semester - 1, 1);
                 break;
             default:
                 throw new Exception("Invalid semester!");
@@ -423,7 +426,7 @@ public class Account {
         Element schFee = webData.getElementById("THocPhi_GridInfo");
         if (schFee != null) {
             Elements schFeeList = schFee.getElementsByClass("GridRow");
-            if (schFeeList.size() > 0) {
+            if (!schFeeList.isEmpty()) {
                 for (Element row : schFeeList) {
                     Elements cellList = row.getElementsByClass("GridCell");
 
@@ -455,10 +458,9 @@ public class Account {
         return result;
     }
 
-    @SuppressWarnings("null")
     public static AccountInformation fetchAccountInformation(@Nonnull Session session) throws Exception {
-        if (!session.isVaildSession())
-            throw new Exception("Invaild session!");
+        if (!session.isValidSession())
+            throw new Exception("Invalid session!");
 
         if (!isLoggedIn(session)) {
             throw new Exception(
@@ -469,7 +471,7 @@ public class Account {
                 new HttpClientWrapper.Header("Cookie",
                         Utils.jsoupExtraUtils.sessionIdToSubCookie(session.getSessionId()))));
         HttpClientWrapper.Response response = HttpClientWrapper.get(
-                Variables.URL_ACCOUNTINFORMATION,
+                Variables.URL_SV_ACCOUNTINFORMATION,
                 headers,
                 60);
 
@@ -540,10 +542,9 @@ public class Account {
         return result;
     }
 
-    @SuppressWarnings("null")
     public static AccountTrainingStatus fetchAccountTrainingStatus(@Nonnull Session session) throws Exception {
-        if (!session.isVaildSession())
-            throw new Exception("Invaild session!");
+        if (!session.isValidSession())
+            throw new Exception("Invalid session!");
 
         if (!isLoggedIn(session)) {
             throw new Exception(
@@ -554,7 +555,7 @@ public class Account {
                 new HttpClientWrapper.Header("Cookie",
                         Utils.jsoupExtraUtils.sessionIdToSubCookie(session.getSessionId()))));
         HttpClientWrapper.Response response = HttpClientWrapper.get(
-                Variables.URL_ACCOUNTTRAININGSTATUS,
+                Variables.URL_SV_ACCOUNTTRAININGSTATUS,
                 headers,
                 60);
 
@@ -585,7 +586,7 @@ public class Account {
                     || cellData.get(cellData.size() - 3).text().isEmpty())
                 continue;
 
-            Boolean first = false;
+            boolean first = false;
             if (trainSum.getSchoolYearStart() == null) {
                 first = true;
             } else if (trainSum.getSchoolYearStart().isEmpty()) {
@@ -650,4 +651,6 @@ public class Account {
 
         return result;
     }
+
+
 }

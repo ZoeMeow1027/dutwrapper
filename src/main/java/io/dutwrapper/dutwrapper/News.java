@@ -1,6 +1,6 @@
 package io.dutwrapper.dutwrapper;
 
-import java.io.IOException;
+import java.io.Serializable;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
+import com.google.gson.annotations.SerializedName;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -25,23 +26,264 @@ import org.jsoup.select.Elements;
 
 import io.dutwrapper.dutwrapper.model.accounts.LessonItem;
 import io.dutwrapper.dutwrapper.model.accounts.SubjectCodeItem;
-import io.dutwrapper.dutwrapper.model.enums.LessonStatus;
-import io.dutwrapper.dutwrapper.model.enums.NewsSearchType;
-import io.dutwrapper.dutwrapper.model.enums.NewsType;
-import io.dutwrapper.dutwrapper.model.news.LinkItem;
-import io.dutwrapper.dutwrapper.model.news.NewsGlobalItem;
-import io.dutwrapper.dutwrapper.model.news.NewsSubjectAffectedItem;
-import io.dutwrapper.dutwrapper.model.news.NewsSubjectItem;
 
-@SuppressWarnings("SpellCheckingInspection")
 public class News {
-    public static ArrayList<NewsGlobalItem> getNews(
+    public enum LessonStatus {
+        Unknown,
+        Leaving,
+        MakeUp
+    }
+
+    public enum NewsSearchType {
+        ByTitle("TieuDe"),
+        ByContent("NoiDung");
+
+        private String value;
+        private NewsSearchType(String s) {
+            this.value = s;
+        }
+
+        public String toString() {
+            return value;
+        }
+    }
+
+    public enum NewsType {
+        Global("CTRTBSV"),
+        Subject("CTRTBGV");
+
+        private String value;
+        private NewsType(String s) {
+            this.value = s;
+        }
+
+        public String toString() {
+            return value;
+        }
+    }
+
+    public static class NewsResource implements Serializable {
+        @SerializedName("text")
+        private String text;
+        @SerializedName("url")
+        private String content;
+        @SerializedName("type")
+        private String type;
+        @SerializedName("position")
+        private Integer position;
+
+        public NewsResource(String text, String type, String content, Integer position) {
+            this.text = text;
+            this.type = type;
+            this.content = content;
+            this.position = position;
+        }
+
+        public String getText() {
+            return text;
+        }
+
+        public void setText(String text) {
+            this.text = text;
+        }
+
+        public String getContent() {
+            return content;
+        }
+
+        public void setContent(String content) {
+            this.content = content;
+        }
+
+        public String getType() { return type; }
+
+        public void setType(String type) { this.type = type; }
+
+        public Integer getPosition() {
+            return position;
+        }
+
+        public void setPosition(Integer position) {
+            this.position = position;
+        }
+    }
+
+    public static class NewsItem implements Serializable {
+        @SerializedName("title")
+        private String title;
+        @SerializedName("content_html")
+        private String contentHtml;
+        @SerializedName("content")
+        private String content;
+        @SerializedName("date")
+        private Long date;
+        @SerializedName("links")
+        private ArrayList<io.dutwrapper.dutwrapper.News.NewsResource> resources;
+
+        public NewsItem() {
+
+        }
+
+        public String getTitle() {
+            return title;
+        }
+
+        public void setTitle(String title) {
+            this.title = title;
+        }
+
+        public String getContentHtml() {
+            return contentHtml;
+        }
+
+        public void setContentHtml(String contentHtml) {
+            this.contentHtml = contentHtml;
+        }
+
+        public String getContent() {
+            return content;
+        }
+
+        public void setContent(String content) {
+            this.content = content;
+        }
+
+        public Long getDate() {
+            return date;
+        }
+
+        public void setDate(Long date) {
+            this.date = date;
+        }
+
+        public ArrayList<io.dutwrapper.dutwrapper.News.NewsResource> getResources() {
+            return resources;
+        }
+
+        public void setResources(ArrayList<io.dutwrapper.dutwrapper.News.NewsResource> resources) {
+            this.resources = resources;
+        }
+    }
+
+    public static class NewsSubjectItem extends io.dutwrapper.dutwrapper.News.NewsItem {
+        @SerializedName("affected_class")
+        private ArrayList<NewsSubjectAffectedItem> affectedClass = new ArrayList<>();
+        @SerializedName("affected_date")
+        private Long affectedDate = 0L;
+        @SerializedName("status")
+        private LessonStatus lessonStatus = LessonStatus.Unknown;
+        @SerializedName("affected_lessons")
+        private LessonItem affectedLesson;
+        @SerializedName("makeup_room")
+        private String affectedRoom;
+        @SerializedName("lecturer_name")
+        private String lecturerName = "";
+        @SerializedName("lecturer_gender")
+        private Boolean lecturerGender = false;
+
+        public Long getAffectedDate() {
+            return affectedDate;
+        }
+
+        public void setAffectedDate(Long affectedDate) {
+            this.affectedDate = affectedDate;
+        }
+
+        public LessonStatus getLessonStatus() {
+            return lessonStatus;
+        }
+
+        public void setLessonStatus(LessonStatus lessonStatus) {
+            this.lessonStatus = lessonStatus;
+        }
+
+        public LessonItem getAffectedLesson() {
+            return affectedLesson;
+        }
+
+        public void setAffectedLesson(LessonItem affectedLesson) {
+            this.affectedLesson = affectedLesson;
+        }
+
+        public String getAffectedRoom() {
+            return affectedRoom;
+        }
+
+        public void setAffectedRoom(String affectedRoom) {
+            this.affectedRoom = affectedRoom;
+        }
+
+        public ArrayList<NewsSubjectAffectedItem> getAffectedClass() {
+            return affectedClass;
+        }
+
+        public void setAffectedClass(ArrayList<NewsSubjectAffectedItem> affectedClass) {
+            this.affectedClass = affectedClass;
+        }
+
+        public String getLecturerName() {
+            return lecturerName;
+        }
+
+        public void setLecturerName(String lecturerName) {
+            this.lecturerName = lecturerName;
+        }
+
+        public Boolean getLecturerGender() {
+            return lecturerGender;
+        }
+
+        public void setLecturerGender(Boolean lecturerGender) {
+            this.lecturerGender = lecturerGender;
+        }
+
+        public NewsSubjectItem(ArrayList<NewsSubjectAffectedItem> affectedClass, Long affectedDate, LessonStatus lessonStatus, LessonItem affectedLesson, String affectedRoom) {
+            this.affectedClass = affectedClass;
+            this.affectedDate = affectedDate;
+            this.lessonStatus = lessonStatus;
+            this.affectedLesson = affectedLesson;
+            this.affectedRoom = affectedRoom;
+        }
+
+        public NewsSubjectItem() { }
+    }
+
+    public static class NewsSubjectAffectedItem implements Serializable {
+        @SerializedName("code_list")
+        private ArrayList<SubjectCodeItem> codeList = new ArrayList<>();
+        @SerializedName("name")
+        private String subjectName = "";
+
+        public NewsSubjectAffectedItem() { }
+
+        public NewsSubjectAffectedItem(String subjectName) {
+            this.subjectName = subjectName;
+        }
+
+        public ArrayList<SubjectCodeItem> getCodeList() {
+            return codeList;
+        }
+
+        public void setCodeList(ArrayList<SubjectCodeItem> codeList) {
+            this.codeList = codeList;
+        }
+
+        public String getSubjectName() {
+            return subjectName;
+        }
+
+        public void setSubjectName(String subjectName) {
+            this.subjectName = subjectName;
+        }
+    }
+
+    private static ArrayList<NewsItem> getNews(
             @Nullable NewsType newsType,
             @Nullable Integer page,
             @Nullable NewsSearchType searchType,
-            @Nullable String searchQuery) throws Exception, IOException {
+            @Nullable String searchQuery) throws Exception {
         String url = String.format(
-                Variables.URL_NEWS,
+                Variables.URL_SV_NEWS,
                 newsType == null ? NewsType.Global.toString() : newsType.toString(),
                 page == null ? 1 : page,
                 searchType == null ? NewsSearchType.ByTitle.toString() : searchType.toString(),
@@ -65,17 +307,23 @@ public class News {
             el.remove();
         }
 
-        // News General + News Subject
-        Elements tbBox = webData.getElementsByClass("tbbox");
+        // Get available news in that page (max in server is 30 per page).
+        Elements tbBox = webData.getElementsByClass("tbBox");
 
-        ArrayList<NewsGlobalItem> newsList = new ArrayList<>();
-        for (Element tb1 : tbBox) {
-            NewsGlobalItem newsItem = new NewsGlobalItem();
+        // This will be returned if done here.
+        ArrayList<NewsItem> newsList = new ArrayList<>();
+        // Processing with every single item.
+        for (Element tbBoxItem : tbBox) {
+            NewsItem newsItem = new NewsItem();
 
-            Element title = tb1.getElementsByClass("tbBoxCaption").get(0);
+            // Get news title.
+            Element title = tbBoxItem.getElementsByClass("tbBoxCaption").get(0);
+            // Split title to 2 strings (if possible, to get date and title).
             String[] titleTemp = title.text().split(":", 2);
-            Element content = tb1.getElementsByClass("tbBoxContent").get(0);
+            // Get news content.
+            Element content = tbBoxItem.getElementsByClass("tbBoxContent").get(0);
 
+            // If separated to 2 string, parse date and title here.
             if (titleTemp.length == 2) {
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
                 LocalDate date = LocalDate.parse(titleTemp[0], formatter);
@@ -83,42 +331,60 @@ public class News {
                 LocalDateTime dateTime = date.atTime(time);
                 newsItem.setDate(dateTime.atZone(ZoneOffset.UTC).toInstant().toEpochMilli());
                 newsItem.setTitle(titleTemp[1].trim());
-            } else
+            }
+            // Otherwise, simply return title without date.
+            else {
                 newsItem.setTitle(title.text().trim());
+            }
 
-            newsItem.setContent(content.html());
-            newsItem.setContentString(content.wholeText());
+            // Set content and contentHtml here.
+            // contentHtml for full HTML code news while content is text-only news.
+            newsItem.setContentHtml(content.html());
+            newsItem.setContent(content.wholeText());
 
-            // Find links and set to item
-            ArrayList<LinkItem> links = new ArrayList<>();
+            // Task: Find links and set to item
+            ArrayList<NewsResource> links = new ArrayList<>();
+            // Set begin position.
             int position = 0;
-            String temp1 = content.wholeText();
-            Elements temp2 = content.getElementsByTag("a");
-            for (Element item : temp2) {
-                if (temp1.contains(item.wholeText())) {
-                    position += temp1.indexOf(item.wholeText());
-                    LinkItem item1 = new LinkItem(
+            // Get text-only news.
+            String tmpString = content.wholeText();
+            // Get all elements in this news with tag <a>.
+            Elements tmpLink = content.getElementsByTag("a");
+            // Processing with every single tag <a>.
+            for (Element item : tmpLink) {
+                // Check if tmpString contains link string.
+                if (tmpString.contains(item.wholeText())) {
+                    NewsResource item1 = new NewsResource(
                             item.wholeText(),
+                            "link",
                             item.attr("abs:href"),
-                            position);
+                            // Position here from root position and indexOf() link string.
+                            position + tmpString.indexOf(item.wholeText())
+                    );
+                    // Add this resource to NewsResource.
                     links.add(item1);
-                    position += item.wholeText().length();
+                    // Position here will plus (indexOf() link string) and (length() link string).
+                    position += tmpString.indexOf(item.wholeText()) + item.wholeText().length();
 
                     // https://stackoverflow.com/questions/24220509/exception-when-replacing-brackets
-                    String[] temp3 = temp1.split(Pattern.quote(item.wholeText()), 2);
-                    if (temp3.length > 1)
-                        temp1 = temp3[1];
+                    String[] temp3 = tmpString.split(Pattern.quote(item.wholeText()), 2);
+                    if (temp3.length > 1) {
+                        tmpString = temp3[1];
+                    }
                 }
             }
-            newsItem.setLinks(links);
+            // Add resource list to news item.
+            newsItem.setResources(links);
 
+            // Add to news list.
             newsList.add(newsItem);
         }
 
+        // Return news list.
         return newsList;
     }
 
-    public static ArrayList<NewsGlobalItem> getNewsGlobal(
+    public static ArrayList<NewsItem> getNewsGlobal(
             @Nullable Integer page,
             @Nullable NewsSearchType searchType,
             @Nullable String searchQuery) throws Exception {
@@ -134,21 +400,21 @@ public class News {
             @Nullable NewsSearchType searchType,
             @Nullable String searchQuery) throws Exception {
         ArrayList<NewsSubjectItem> result = new ArrayList<>();
-        ArrayList<NewsGlobalItem> listTemp = getNews(
+        ArrayList<NewsItem> listTemp = getNews(
                 NewsType.Subject,
                 page == null ? 1 : page,
                 searchType,
                 searchQuery);
 
-        for (NewsGlobalItem item : listTemp) {
+        for (NewsItem item : listTemp) {
             NewsSubjectItem subjectItem = new NewsSubjectItem();
 
             // Add as like news global.
             subjectItem.setDate(item.getDate());
             subjectItem.setTitle(item.getTitle());
+            subjectItem.setContentHtml(item.getContentHtml());
             subjectItem.setContent(item.getContent());
-            subjectItem.setContentString(item.getContentString());
-            subjectItem.setLinks(subjectItem.getLinks());
+            subjectItem.setResources(subjectItem.getResources());
 
             // For title
             try {
@@ -163,30 +429,30 @@ public class News {
             }
 
             // For content. If found something, do work. If not, just ignore.
-            if (subjectItem.getContent().contains("HỌC BÙ")) {
+            if (subjectItem.getContentHtml().contains("HỌC BÙ")) {
                 subjectItem.setLessonStatus(LessonStatus.MakeUp);
                 subjectItem.setAffectedDate(Utils.date2UnixTimestamp(
-                        Utils.findFirstString(subjectItem.getContentString(), "\\d{2}[-|/]\\d{2}[-|/]\\d{4}")));
+                        Utils.findFirstString(subjectItem.getContent(), "\\d{2}[-|/]\\d{2}[-|/]\\d{4}")));
                 try {
                     subjectItem.setAffectedLesson(getLessonItem(
-                            Objects.requireNonNull(Utils.findFirstString(subjectItem.getContentString().toLowerCase(),
+                            Objects.requireNonNull(Utils.findFirstString(subjectItem.getContent().toLowerCase(),
                                     "tiết: .*[0-9],")).replace("tiết:", "").replace(",", "").trim()));
                 } catch (Exception ignored) {
                 }
                 try {
                     subjectItem.setAffectedRoom(Objects
                             .requireNonNull(
-                                    Utils.findFirstString(subjectItem.getContentString().toLowerCase(), "phòng:.*"))
+                                    Utils.findFirstString(subjectItem.getContent().toLowerCase(), "phòng:.*"))
                             .replace("phòng:", "").replace(",", "").trim().toUpperCase());
                 } catch (Exception ignored) {
                 }
-            } else if (subjectItem.getContent().contains("NGHỈ HỌC")) {
+            } else if (subjectItem.getContentHtml().contains("NGHỈ HỌC")) {
                 subjectItem.setLessonStatus(LessonStatus.Leaving);
                 subjectItem.setAffectedDate(Utils.date2UnixTimestamp(
-                        Utils.findFirstString(subjectItem.getContentString(), "\\d{2}[-|/]\\d{2}[-|/]\\d{4}")));
+                        Utils.findFirstString(subjectItem.getContent(), "\\d{2}[-|/]\\d{2}[-|/]\\d{4}")));
                 try {
                     subjectItem.setAffectedLesson(getLessonItem(
-                            Objects.requireNonNull(Utils.findFirstString(subjectItem.getContentString().toLowerCase(),
+                            Objects.requireNonNull(Utils.findFirstString(subjectItem.getContent().toLowerCase(),
                                     "\\(tiết:.*[0-9]\\)")).replace("(tiết:", "").replace(")", "").trim()));
                 } catch (Exception ignored) {
                 }

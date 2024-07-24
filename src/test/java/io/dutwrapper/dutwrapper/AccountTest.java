@@ -1,5 +1,6 @@
 package io.dutwrapper.dutwrapper;
 
+import com.google.gson.GsonBuilder;
 import org.junit.jupiter.api.Test;
 
 import com.google.gson.Gson;
@@ -7,6 +8,8 @@ import com.google.gson.Gson;
 public class AccountTest {
     @Test
     void test() throws Exception {
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+
         String envDutAccount = System.getenv("dut_account");
         if (envDutAccount == null)
             throw new Exception("No account found! Please define \"dut_account\" variable to test account library.");
@@ -19,7 +22,6 @@ public class AccountTest {
 
         Account.Session session = Account.getSession();
         Account.AuthInfo authInfo = new Account.AuthInfo(user, pass);
-        Gson gson = new Gson();
 
         System.out.println("Create new Session");
         System.out.println(gson.toJson(session));

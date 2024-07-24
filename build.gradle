@@ -3,7 +3,7 @@ plugins {
 }
 
 group 'io.dutwrapper.dutwrapper'
-version '1.10.1'
+version '1.10.2'
 
 repositories {
     mavenCentral()
@@ -25,7 +25,7 @@ dependencies {
     implementation 'com.google.guava:guava:33.2.1-jre'
 
     // JSoup - https://mvnrepository.com/artifact/org.jsoup/jsoup
-    implementation 'org.jsoup:jsoup:1.17.2'
+    implementation 'org.jsoup:jsoup:1.18.1'
 
     // OkHttp3 - https://mvnrepository.com/artifact/com.squareup.okhttp3/okhttp
     implementation 'com.squareup.okhttp3:okhttp:5.0.0-alpha.14'
