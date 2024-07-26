@@ -51,9 +51,6 @@ public class HttpClientWrapper {
         private @Nullable String message;
         private @Nullable String sessionId;
 
-        public Response() {
-        }
-
         public Response(@Nullable Integer statusCode, @Nullable String content, @Nullable Exception exception,
                 @Nullable String message, @Nullable String sessionId) {
             this.content = content;

@@ -3,13 +3,16 @@ plugins {
 }
 
 group 'io.dutwrapper.dutwrapper'
-version '1.10.2'
+version '1.11.0'
 
 repositories {
     mavenCentral()
 }
 
+// https://stackoverflow.com/a/34717160
 compileJava.options.encoding = 'UTF-8'
+compileTestJava.options.encoding = 'UTF-8'
+// compileJava.options.javaModuleVersion = provider { project.version }
 
 dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.0'
@@ -36,13 +39,6 @@ dependencies {
 
 test {
     useJUnitPlatform()
-}
-
-// https://stackoverflow.com/a/34717160
-tasks.named('compileJava') {
-    // use the project's version or define one directly
-    options.encoding = 'UTF-8'
-    options.javaModuleVersion = provider { project.version }
 }
 
 java {

@@ -1,37 +1,17 @@
 package io.dutwrapper.dutwrapper;
 
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import io.dutwrapper.dutwrapper.model.accounts.AccountInformation;
-import io.dutwrapper.dutwrapper.model.accounts.LessonItem;
-import io.dutwrapper.dutwrapper.model.accounts.ScheduleExam;
-import io.dutwrapper.dutwrapper.model.accounts.ScheduleItem;
-import io.dutwrapper.dutwrapper.model.accounts.ScheduleStudy;
-import io.dutwrapper.dutwrapper.model.accounts.SubjectCodeItem;
-import io.dutwrapper.dutwrapper.model.accounts.SubjectFeeItem;
-import io.dutwrapper.dutwrapper.model.accounts.SubjectScheduleItem;
-import io.dutwrapper.dutwrapper.model.accounts.WeekItem;
-import io.dutwrapper.dutwrapper.model.accounts.trainingresult.AccountTrainingStatus;
-import io.dutwrapper.dutwrapper.model.accounts.trainingresult.GraduateStatus;
-import io.dutwrapper.dutwrapper.model.accounts.trainingresult.SubjectResult;
-import io.dutwrapper.dutwrapper.model.accounts.trainingresult.TrainingSummary;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.util.*;
 
-@SuppressWarnings("CallToPrintStackTrace")
-public class Account {
+public class Accounts {
     public static class AuthInfo {
         @Nullable
         String username;
@@ -44,18 +24,12 @@ public class Account {
         }
 
         public boolean isValidAuth() {
-            // Check username
-            if (username == null)
+            // Check username and password is null
+            if (username == null || password == null) {
                 return false;
-            if (username.length() < 6)
-                return false;
-            // Check password
-            if (password == null)
-                return false;
-            if (password.length() < 6)
-                return false;
-            // Otherwise, return true
-            return true;
+            }
+            // Check username or password length is smaller than 6.
+            else return username.length() >= 6 && password.length() >= 6;
         }
 
         public @Nullable String getUsername() {
@@ -100,6 +74,7 @@ public class Account {
         }
     }
 
+    @SuppressWarnings("CallToPrintStackTrace")
     public static Session getSession() throws Exception {
         HttpClientWrapper.Response get = HttpClientWrapper.get(Variables.URL_SV_LOGIN, null, 60);
         if (get.getException() != null) {
@@ -133,14 +108,14 @@ public class Account {
             throw new Exception("Invalid session!");
         }
 
-        Map<String, String> data = new HashMap<String, String>();
+        Map<String, String> data = new HashMap<>();
         data.put("__VIEWSTATE", session.getViewState());
         data.put("__VIEWSTATEGENERATOR", session.getViewStateGenerator());
         data.put("_ctl0:MainContent:DN_txtAcc", auth.getUsername());
         data.put("_ctl0:MainContent:DN_txtPass", auth.getPassword());
         data.put("_ctl0:MainContent:QLTH_btnLogin", "Đăng+nhập");
 
-        List<HttpClientWrapper.Header> headers = new ArrayList<>(Arrays.asList(
+        List<HttpClientWrapper.Header> headers = new ArrayList<>(Collections.singletonList(
                 new HttpClientWrapper.Header("Cookie",
                         Utils.jsoupExtraUtils.sessionIdToSubCookie(session.getSessionId()))));
 
@@ -155,7 +130,7 @@ public class Account {
         if (!session.isValidSession())
             throw new Exception("Invalid session!");
 
-        List<HttpClientWrapper.Header> headers = new ArrayList<>(Arrays.asList(
+        List<HttpClientWrapper.Header> headers = new ArrayList<>(Collections.singletonList(
                 new HttpClientWrapper.Header("Cookie",
                         Utils.jsoupExtraUtils.sessionIdToSubCookie(session.getSessionId()))));
 
@@ -165,21 +140,21 @@ public class Account {
             throw response.getException();
         }
 
-        return response.getStatusCode() >= 200 && response.getStatusCode() < 300;
+        return response.getStatusCode() >= 200 && response.getStatusCode() <= 300;
     }
 
     public static void logout(@Nonnull Session session) throws Exception {
         if (!session.isValidSession())
             throw new Exception("Invalid session!");
 
-        List<HttpClientWrapper.Header> headers = new ArrayList<>(Arrays.asList(
+        List<HttpClientWrapper.Header> headers = new ArrayList<>(Collections.singletonList(
                 new HttpClientWrapper.Header("Cookie",
                         Utils.jsoupExtraUtils.sessionIdToSubCookie(session.getSessionId()))));
 
         HttpClientWrapper.get(Variables.URL_SV_LOGOUT, headers, 60);
     }
 
-    public static ArrayList<SubjectScheduleItem> fetchSubjectSchedule(@Nonnull Session session, @Nonnull Integer year,
+    public static ArrayList<AccountInformation.SubjectInformation> fetchSubjectSchedule(@Nonnull Session session, @Nonnull Integer year,
                                                                       @Nonnull Integer semester)
             throws Exception {
         if (!session.isValidSession())
@@ -203,7 +178,7 @@ public class Account {
                 throw new Exception("Invalid semester!");
         }
 
-        List<HttpClientWrapper.Header> headers = new ArrayList<>(Arrays.asList(
+        List<HttpClientWrapper.Header> headers = new ArrayList<>(Collections.singletonList(
                 new HttpClientWrapper.Header("Cookie",
                         Utils.jsoupExtraUtils.sessionIdToSubCookie(session.getSessionId()))));
         HttpClientWrapper.Response response = HttpClientWrapper.get(
@@ -227,7 +202,7 @@ public class Account {
 
         Document webData = Jsoup.parse(response.getContent());
 
-        ArrayList<SubjectScheduleItem> result = new ArrayList<>();
+        ArrayList<AccountInformation.SubjectInformation> result = new ArrayList<>();
 
         // Schedule study
         Element schStudy = webData.getElementById("TTKB_GridInfo");
@@ -240,8 +215,8 @@ public class Account {
                     if (cellList.size() < 10)
                         continue;
 
-                    SubjectScheduleItem si = new SubjectScheduleItem();
-                    si.setId(new SubjectCodeItem(cellList.get(1).text()));
+                    AccountInformation.SubjectInformation si = new AccountInformation.SubjectInformation();
+                    si.setId(new AccountInformation.SubjectCode(cellList.get(1).text()));
                     si.setName(cellList.get(2).text());
                     try {
                         si.setCredit(Integer.parseInt(cellList.get(3).text()));
@@ -252,12 +227,12 @@ public class Account {
                     si.setLecturer(cellList.get(6).text());
 
                     // Set schedule study here!
-                    ScheduleStudy scheduleStudy = new ScheduleStudy();
+                    AccountInformation.ScheduleStudy scheduleStudy = new AccountInformation.ScheduleStudy();
 
                     if (!cellList.get(7).text().isEmpty()) {
                         String[] cellSplit = cellList.get(7).text().split("; ");
                         for (String cellSplitItem : cellSplit) {
-                            ScheduleItem scheduleItem = new ScheduleItem();
+                            AccountInformation.ScheduleItem scheduleItem = new AccountInformation.ScheduleItem();
                             // Set day of week
                             if (cellSplitItem.toUpperCase().contains("CN")) {
                                 scheduleItem.setDayOfWeek(0);
@@ -266,10 +241,11 @@ public class Account {
                                         .setDayOfWeek(Integer.parseInt(cellSplitItem.split(",")[0].split(" ")[1]) - 1);
                             }
                             // Set lesson
-                            LessonItem lessonItem = new LessonItem();
-                            lessonItem.setStart(Integer.parseInt(cellSplitItem.split(",")[1].split("-")[0]));
-                            lessonItem.setEnd(Integer.parseInt(cellSplitItem.split(",")[1].split("-")[1]));
-                            scheduleItem.setLesson(lessonItem);
+                            AccountInformation.LessonAffected lessonAffected = new AccountInformation.LessonAffected(
+                                    Integer.parseInt(cellSplitItem.split(",")[1].split("-")[0]),
+                                    Integer.parseInt(cellSplitItem.split(",")[1].split("-")[1])
+                            );
+                            scheduleItem.setLesson(lessonAffected);
                             // Set room
                             scheduleItem.setRoom(cellSplitItem.split(",")[2]);
                             // Add to schedule list.
@@ -281,16 +257,16 @@ public class Account {
                     if (!cellList.get(8).text().isEmpty()) {
                         String[] cellSplit = cellList.get(8).text().split(";");
                         for (String cellSplitItem : cellSplit) {
-                            WeekItem weekItem = new WeekItem(
+                            AccountInformation.WeekAffected weekItem = new AccountInformation.WeekAffected(
                                     Integer.parseInt(cellSplitItem.split("-")[0]),
                                     Integer.parseInt(cellSplitItem.split("-")[1])
                             );
-                            scheduleStudy.getWeekList().add(weekItem);
+                            scheduleStudy.getWeekAffected().add(weekItem);
                         }
                     }
 
                     // Add to subject schedule item.
-                    si.setSubjectStudy(scheduleStudy);
+                    si.setScheduleStudy(scheduleStudy);
 
                     // Set subject point formula.
                     si.setPointFormula(cellList.get(10).text());
@@ -312,14 +288,14 @@ public class Account {
                     if (cellList.size() < 5)
                         continue;
 
-                    SubjectScheduleItem si = result.stream()
+                    AccountInformation.SubjectInformation si = result.stream()
                             .filter(s -> s.getId().toString(false).equals(cellList.get(1).text()))
                             .findFirst()
                             .orElse(null);
 
                     // Set subject examination here!
                     if (si != null) {
-                        ScheduleExam scheduleExam = new ScheduleExam();
+                        AccountInformation.ScheduleExam scheduleExam = new AccountInformation.ScheduleExam();
                         // Set group
                         scheduleExam.setGroup(cellList.get(3).text());
                         // Set is global
@@ -364,7 +340,7 @@ public class Account {
                         }
                         // Set date
                         scheduleExam.setDate(localDateTime.toEpochSecond(ZoneOffset.UTC) * 1000);
-                        si.setSubjectExam(scheduleExam);
+                        si.setScheduleExam(scheduleExam);
                     }
                 }
             }
@@ -373,7 +349,7 @@ public class Account {
         return result;
     }
 
-    public static ArrayList<SubjectFeeItem> fetchSubjectFee(@Nonnull Session session, @Nonnull Integer year,
+    public static ArrayList<AccountInformation.SubjectFee> fetchSubjectFee(@Nonnull Session session, @Nonnull Integer year,
                                                             @Nonnull Integer semester)
             throws Exception {
         if (!session.isValidSession())
@@ -397,7 +373,7 @@ public class Account {
                 throw new Exception("Invalid semester!");
         }
 
-        List<HttpClientWrapper.Header> headers = new ArrayList<>(Arrays.asList(
+        List<HttpClientWrapper.Header> headers = new ArrayList<>(Collections.singletonList(
                 new HttpClientWrapper.Header("Cookie",
                         Utils.jsoupExtraUtils.sessionIdToSubCookie(session.getSessionId()))));
         HttpClientWrapper.Response response = HttpClientWrapper.get(
@@ -421,7 +397,7 @@ public class Account {
 
         Document webData = Jsoup.parse(response.getContent());
 
-        ArrayList<SubjectFeeItem> result = new ArrayList<>();
+        ArrayList<AccountInformation.SubjectFee> result = new ArrayList<>();
 
         Element schFee = webData.getElementById("THocPhi_GridInfo");
         if (schFee != null) {
@@ -433,8 +409,8 @@ public class Account {
                     if (cellList.size() < 10)
                         continue;
 
-                    SubjectFeeItem sf = new SubjectFeeItem();
-                    sf.setId(new SubjectCodeItem(cellList.get(1).text()));
+                    AccountInformation.SubjectFee sf = new AccountInformation.SubjectFee();
+                    sf.setId(new AccountInformation.SubjectCode(cellList.get(1).text()));
                     sf.setName(cellList.get(2).text());
                     try {
                         sf.setCredit(Integer.parseInt(cellList.get(3).text()));
@@ -458,7 +434,7 @@ public class Account {
         return result;
     }
 
-    public static AccountInformation fetchAccountInformation(@Nonnull Session session) throws Exception {
+    public static AccountInformation.StudentInformation fetchStudentInformation(@Nonnull Session session) throws Exception {
         if (!session.isValidSession())
             throw new Exception("Invalid session!");
 
@@ -467,7 +443,7 @@ public class Account {
                     "No account logged in this session. May be you haven't logged in or this session is expired?");
         }
 
-        ArrayList<HttpClientWrapper.Header> headers = new ArrayList<>(Arrays.asList(
+        ArrayList<HttpClientWrapper.Header> headers = new ArrayList<>(Collections.singletonList(
                 new HttpClientWrapper.Header("Cookie",
                         Utils.jsoupExtraUtils.sessionIdToSubCookie(session.getSessionId()))));
         HttpClientWrapper.Response response = HttpClientWrapper.get(
@@ -490,7 +466,7 @@ public class Account {
         }
 
         Document webData = Jsoup.parse(response.getContent());
-        AccountInformation result = new AccountInformation(
+        AccountInformation.StudentInformation result = new AccountInformation.StudentInformation(
                 Utils.jsoupExtraUtils.getValue(webData.getElementById("CN_txtHoTen")),
                 Utils.jsoupExtraUtils.getValue(webData.getElementById("CN_txtNgaySinh")),
                 Utils.jsoupExtraUtils.getText(
@@ -542,7 +518,7 @@ public class Account {
         return result;
     }
 
-    public static AccountTrainingStatus fetchAccountTrainingStatus(@Nonnull Session session) throws Exception {
+    public static AccountInformation.TrainingStatus fetchTrainingStatus(@Nonnull Session session) throws Exception {
         if (!session.isValidSession())
             throw new Exception("Invalid session!");
 
@@ -551,7 +527,7 @@ public class Account {
                     "No account logged in this session. May be you haven't logged in or this session is expired?");
         }
 
-        List<HttpClientWrapper.Header> headers = new ArrayList<>(Arrays.asList(
+        List<HttpClientWrapper.Header> headers = new ArrayList<>(Collections.singletonList(
                 new HttpClientWrapper.Header("Cookie",
                         Utils.jsoupExtraUtils.sessionIdToSubCookie(session.getSessionId()))));
         HttpClientWrapper.Response response = HttpClientWrapper.get(
@@ -574,10 +550,10 @@ public class Account {
         }
 
         Document webData = Jsoup.parse(response.getContent());
-        AccountTrainingStatus result = new AccountTrainingStatus();
+        AccountInformation.TrainingStatus result = new AccountInformation.TrainingStatus();
 
         // Training status
-        TrainingSummary trainSum = new TrainingSummary();
+        AccountInformation.TrainingSummary trainSum = new AccountInformation.TrainingSummary();
         Elements accTrainingStatus = webData.getElementById("KQRLGridTH").getElementsByClass("GridRow");
         for (Element data : accTrainingStatus) {
             Elements cellData = data.getElementsByClass("GridCell");
@@ -606,7 +582,7 @@ public class Account {
 
         // Graduate status
         Element accGraduateStatus = webData.getElementById("KQRLdvCc");
-        GraduateStatus graduateStatus = new GraduateStatus(
+        AccountInformation.GraduateStatus graduateStatus = new AccountInformation.GraduateStatus(
                 accGraduateStatus.getElementById("KQRL_chkGDTC").hasAttr("checked"),
                 accGraduateStatus.getElementById("KQRL_chkQP").hasAttr("checked"),
                 accGraduateStatus.getElementById("KQRL_chkCCNN").hasAttr("checked"),
@@ -619,12 +595,12 @@ public class Account {
         result.setGraduateStatus(graduateStatus);
 
         // Subject Result list
-        ArrayList<SubjectResult> accSubjectResult = new ArrayList<>();
+        ArrayList<AccountInformation.SubjectResult> accSubjectResult = new ArrayList<>();
         Elements accSubjectResultList = webData.getElementById("KQRL_divContent").getElementById("KQRLGridKQHT")
                 .getElementsByClass("GridRow");
         for (int i = accSubjectResultList.size() - 1; i >= 0; i--) {
             Elements cellList = accSubjectResultList.get(i).getElementsByClass("GridCell");
-            SubjectResult item = new SubjectResult(
+            AccountInformation.SubjectResult item = new AccountInformation.SubjectResult(
                     Integer.parseInt(cellList.get(0).text()),
                     cellList.get(1).text(),
                     cellList.get(2).hasClass("GridCheck"),
@@ -643,7 +619,7 @@ public class Account {
                     Utils.jsoupExtraUtils.elementToDoubleOrNull(cellList.get(15)),
                     Utils.jsoupExtraUtils.elementToDoubleOrNull(cellList.get(16)),
                     cellList.get(17).text(),
-                    accSubjectResult.stream().anyMatch(p -> p.getName() == cellList.get(4).text()));
+                    accSubjectResult.stream().anyMatch(p -> p.getName().contains(cellList.get(4).text())));
 
             accSubjectResult.add(item);
         }
@@ -651,6 +627,5 @@ public class Account {
 
         return result;
     }
-
 
 }

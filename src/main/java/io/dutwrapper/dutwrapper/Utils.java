@@ -171,7 +171,7 @@ public class Utils {
         @Nullable
         Element getSelectedValueFromComboBox(Document document);
 
-        String sessionIdToSubCookie(@Nonnull String sessionId);
+        String sessionIdToSubCookie(String sessionId);
     }
 
     public static final JsoupExtraUtils jsoupExtraUtils = new JsoupExtraUtils() {
@@ -277,7 +277,10 @@ public class Utils {
         }
 
         @Override
-        public String sessionIdToSubCookie(@Nonnull String sessionId) {
+        public String sessionIdToSubCookie(String sessionId) {
+            if (sessionId == null) {
+                return "";
+            }
             return String.format(
                 Locale.ROOT,
                 "ASP.NET_SessionId=%s;",
