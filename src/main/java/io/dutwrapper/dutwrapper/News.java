@@ -1,6 +1,7 @@
 package io.dutwrapper.dutwrapper;
 
 import java.io.Serializable;
+import java.lang.reflect.Type;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
@@ -18,6 +19,7 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
+import com.google.gson.*;
 import com.google.gson.annotations.SerializedName;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -26,9 +28,25 @@ import org.jsoup.select.Elements;
 
 public class News {
     public enum LessonStatus {
-        Unknown,
-        Leaving,
-        MakeUp
+        Unknown(-1),
+        Notify(0),
+        Leaving(1),
+        MakeUpLesson(2);
+
+        private final int value;
+
+        LessonStatus(int s) {
+            this.value = s;
+        }
+
+        public int getValue() { return value; }
+
+        public static class Serializer implements JsonSerializer<LessonStatus> {
+            @Override
+            public JsonElement serialize(LessonStatus lessonStatus, Type type, JsonSerializationContext jsonSerializationContext) {
+                return new JsonPrimitive(lessonStatus.getValue());
+            }
+        }
     }
 
     @SuppressWarnings("SpellCheckingInspection")
@@ -66,7 +84,7 @@ public class News {
     public static class NewsResource implements Serializable {
         @SerializedName("text")
         private String text;
-        @SerializedName("url")
+        @SerializedName("content")
         private String content;
         @SerializedName("type")
         // Available: Link
@@ -123,11 +141,11 @@ public class News {
         private String content;
         @SerializedName("date")
         private Long date;
-        @SerializedName("links")
+        @SerializedName("resources")
         private ArrayList<NewsResource> resources;
 
         public NewsItem() {
-
+            this.resources = new ArrayList<>();
         }
 
         public String getTitle() {
@@ -162,12 +180,33 @@ public class News {
             this.date = date;
         }
 
-        public ArrayList<io.dutwrapper.dutwrapper.News.NewsResource> getResources() {
+        public ArrayList<NewsResource> getResources() {
             return resources;
         }
 
-        public void setResources(ArrayList<io.dutwrapper.dutwrapper.News.NewsResource> resources) {
+        public void setResources(ArrayList<NewsResource> resources) {
             this.resources = resources;
+        }
+    }
+
+    public enum LecturerGender {
+        Unknown(-1),
+        Male(0),
+        Female(1);
+
+        private final int value;
+
+        LecturerGender(int s) {
+            this.value = s;
+        }
+
+        public int getValue() { return value; }
+
+        public static class Serializer implements JsonSerializer<LecturerGender> {
+            @Override
+            public JsonElement serialize(LecturerGender lecturerGender, Type type, JsonSerializationContext jsonSerializationContext) {
+                return new JsonPrimitive(lecturerGender.getValue());
+            }
         }
     }
 
@@ -185,7 +224,7 @@ public class News {
         @SerializedName("lecturer_name")
         private String lecturerName = "";
         @SerializedName("lecturer_gender")
-        private Boolean lecturerGender = false;
+        private LecturerGender lecturerGender = LecturerGender.Unknown;
 
         public Long getAffectedDate() {
             return affectedDate;
@@ -235,11 +274,11 @@ public class News {
             this.lecturerName = lecturerName;
         }
 
-        public Boolean getLecturerGender() {
+        public LecturerGender getLecturerGender() {
             return lecturerGender;
         }
 
-        public void setLecturerGender(Boolean lecturerGender) {
+        public void setLecturerGender(LecturerGender lecturerGender) {
             this.lecturerGender = lecturerGender;
         }
 
@@ -251,7 +290,13 @@ public class News {
             this.affectedRoom = affectedRoom;
         }
 
-        public NewsSubjectItem() {
+        public NewsSubjectItem(NewsItem newsGlobal) {
+            this.setTitle(newsGlobal.getTitle());
+            this.setContent(newsGlobal.getContent());
+            this.setContentHtml(newsGlobal.getContentHtml());
+            this.setDate(newsGlobal.getDate());
+            this.getResources().clear();
+            this.getResources().addAll(newsGlobal.getResources());
         }
     }
 
@@ -259,7 +304,7 @@ public class News {
         @SerializedName("code_list")
         private ArrayList<AccountInformation.SubjectCode> codeList = new ArrayList<>();
         @SerializedName("name")
-        private String subjectName = "";
+        private String subjectName;
 
         public AffectedSubject(String subjectName) {
             this.subjectName = subjectName;
@@ -413,20 +458,21 @@ public class News {
                 searchQuery);
 
         for (NewsItem item : listTemp) {
-            NewsSubjectItem subjectItem = new NewsSubjectItem();
-
-            // Add as like news global.
-            subjectItem.setDate(item.getDate());
-            subjectItem.setTitle(item.getTitle());
-            subjectItem.setContentHtml(item.getContentHtml());
-            subjectItem.setContent(item.getContent());
-            subjectItem.setResources(subjectItem.getResources());
+            // Initialize news subject item from news global
+            NewsSubjectItem subjectItem = new NewsSubjectItem(item);
 
             // For title
             try {
                 String lecturerProcessing = item.getTitle().split(" thông báo đến lớp:")[0].trim();
                 String[] splitText = lecturerProcessing.split(" ", 2);
-                subjectItem.setLecturerGender(splitText[0].toLowerCase(Locale.ROOT).equals("cô"));
+                String lecturerGender = splitText[0].toLowerCase(Locale.ROOT);
+                if (lecturerGender.equals("thầy")) {
+                    subjectItem.setLecturerGender(LecturerGender.Male);
+                } else if (lecturerGender.equals("cô")) {
+                    subjectItem.setLecturerGender(LecturerGender.Female);
+                } else {
+                    subjectItem.setLecturerGender(LecturerGender.Unknown);
+                }
                 subjectItem.setLecturerName(splitText[1]);
 
                 subjectItem.getAffectedClass().addAll(getAffectedClass(item.getTitle()));
@@ -438,7 +484,7 @@ public class News {
 
             // For content. If found something, do work. If not, just ignore.
             if (subjectItem.getContentHtml().contains("HỌC BÙ")) {
-                subjectItem.setLessonStatus(LessonStatus.MakeUp);
+                subjectItem.setLessonStatus(LessonStatus.MakeUpLesson);
                 subjectItem.setAffectedDate(Utils.date2UnixTimestamp(
                         Utils.findFirstString(subjectItem.getContent(), "\\d{2}[-|/]\\d{2}[-|/]\\d{4}")));
                 try {
@@ -465,7 +511,7 @@ public class News {
                 } catch (Exception ignored) {
                 }
             } else {
-                subjectItem.setLessonStatus(LessonStatus.Unknown);
+                subjectItem.setLessonStatus(LessonStatus.Notify);
             }
 
             // Add to item.

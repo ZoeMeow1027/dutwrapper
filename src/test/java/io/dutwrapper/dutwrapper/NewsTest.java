@@ -11,7 +11,8 @@ import com.google.gson.Gson;
 class NewsTest {
     @Test
     void getNewsGlobal() {
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        GsonBuilder gsonBuilder = new GsonBuilder().setPrettyPrinting();
+        Gson gson = gsonBuilder.create();
 
         int page = 1;
         int pageMax = 3;
@@ -32,7 +33,11 @@ class NewsTest {
 
     @Test
     void getNewsSubject() {
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        GsonBuilder gsonBuilder = new GsonBuilder()
+                .registerTypeAdapter(News.LessonStatus.class, new News.LessonStatus.Serializer())
+                .registerTypeAdapter(News.LecturerGender.class, new News.LecturerGender.Serializer())
+                .setPrettyPrinting();
+        Gson gson = gsonBuilder.create();
 
         int page = 1;
         int pageMax = 3;
