@@ -1,6 +1,6 @@
 # DUTWRAPPER CHANGE LOG
 
-This file will list all version log for modified, added or removed functions of dutwrapper (java log).
+This file will list all version log for modified, added or removed functions of dutwrapper (Java language).
 
 ## 1.11.0
 - Merge all class in `model` package to `AccountInformation` class.
