@@ -1,15 +1,19 @@
 plugins {
     id 'java-library'
+    id 'maven-publish'
 }
 
-group 'io.dutwrapper.dutwrapper'
-version '1.10.2'
+group 'io.dutwrapper'
+version '1.11.1'
 
 repositories {
     mavenCentral()
 }
 
+// https://stackoverflow.com/a/34717160
 compileJava.options.encoding = 'UTF-8'
+compileTestJava.options.encoding = 'UTF-8'
+// compileJava.options.javaModuleVersion = provider { project.version }
 
 dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.0'
@@ -38,14 +42,25 @@ test {
     useJUnitPlatform()
 }
 
-// https://stackoverflow.com/a/34717160
-tasks.named('compileJava') {
-    // use the project's version or define one directly
-    options.encoding = 'UTF-8'
-    options.javaModuleVersion = provider { project.version }
-}
-
 java {
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8
+}
+
+publishing {
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/dutwrapper/dutwrapper-java")
+            credentials {
+                username = project.findProperty("gpr.user") ?: System.getenv("GitHub_Username")
+                password = project.findProperty("gpr.key") ?: System.getenv("GitHub_TokenPkg")
+            }
+        }
+    }
+    publications {
+        gpr(MavenPublication) {
+            from(components.java)
+        }
+    }
 }
