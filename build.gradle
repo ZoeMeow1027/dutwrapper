@@ -1,9 +1,10 @@
 plugins {
     id 'java-library'
+    id 'maven-publish'
 }
 
-group 'io.dutwrapper.dutwrapper'
-version '1.11.0'
+group 'io.dutwrapper'
+version '1.11.1'
 
 repositories {
     mavenCentral()
@@ -44,4 +45,22 @@ test {
 java {
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8
+}
+
+publishing {
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/dutwrapper/dutwrapper-java")
+            credentials {
+                username = project.findProperty("gpr.user") ?: System.getenv("GitHub_Username")
+                password = project.findProperty("gpr.key") ?: System.getenv("GitHub_TokenPkg")
+            }
+        }
+    }
+    publications {
+        gpr(MavenPublication) {
+            from(components.java)
+        }
+    }
 }

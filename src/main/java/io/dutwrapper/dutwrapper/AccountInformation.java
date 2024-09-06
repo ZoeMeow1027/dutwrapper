@@ -41,18 +41,20 @@ public class AccountInformation {
     public static class SubjectCode implements Serializable {
         // Area 1
         @SerializedName("subject_id")
-        private @Nullable String subjectId = null;
+        private @Nullable String subjectId;
         // Area 2
         @SerializedName("school_year_id")
-        private @Nullable String schoolYearId = null;
+        private @Nullable String schoolYearId;
         // Area 3
         @SerializedName("student_year_id")
-        private String studentYearId = "";
+        private String studentYearId;
         // Area 4
         @SerializedName("class_id")
-        private String classId = "";
+        private String classId;
 
         public SubjectCode(String studentYearId, String classId) {
+            this.subjectId = null;
+            this.schoolYearId = null;
             this.studentYearId = studentYearId;
             this.classId = classId;
         }
@@ -71,8 +73,15 @@ public class AccountInformation {
                 this.studentYearId = input.split("\\.")[2];
                 this.classId = input.split("\\.")[3];
             } else if (input.split("\\.").length == 2) {
+                this.subjectId = null;
+                this.schoolYearId = null;
                 this.studentYearId = input.split("\\.")[0];
                 this.classId = input.split("\\.")[1];
+            } else {
+                this.subjectId = null;
+                this.schoolYearId = null;
+                this.studentYearId = "-";
+                this.classId = "-";
             }
         }
 
@@ -110,7 +119,7 @@ public class AccountInformation {
 
         @Override
         public String toString() {
-            return toString(true);
+            return toString(subjectId == null || schoolYearId == null);
         }
 
         public String toString(Boolean twoLastDigitOnly) {
@@ -1037,7 +1046,7 @@ public class AccountInformation {
         @SerializedName("is_extended_summer")
         private Boolean isExtendedSemester;
         @SerializedName("id")
-        private String id;
+        private SubjectCode id;
         @SerializedName("name")
         private String name;
         @SerializedName("credit")
@@ -1069,7 +1078,7 @@ public class AccountInformation {
         @SerializedName("is_restudy")
         private Boolean isReStudy;
 
-        public SubjectResult(Integer index, String schoolYear, Boolean isExtendedSemester, String id, String name,
+        public SubjectResult(Integer index, String schoolYear, Boolean isExtendedSemester, SubjectCode id, String name,
                              Double credit, @Nullable String pointFormula, @Nullable Double pointBT, @Nullable Double pointBV, @Nullable Double pointCC, @Nullable Double pointCK,
                              @Nullable Double pointGK, @Nullable Double pointQT, @Nullable Double pointTH, @Nullable Double pointTT, @Nullable Double resultT10, @Nullable Double resultT4, @Nullable String resultByChar,
                              Boolean isReStudy) {
@@ -1118,11 +1127,11 @@ public class AccountInformation {
             this.isExtendedSemester = isExtendedSemester;
         }
 
-        public String getId() {
+        public SubjectCode getId() {
             return id;
         }
 
-        public void setId(String id) {
+        public void setId(SubjectCode id) {
             this.id = id;
         }
 
