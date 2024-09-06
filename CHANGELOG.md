@@ -1,24 +1,28 @@
 # DUTWRAPPER CHANGE LOG
 
-This file will list all version log for modified, added or removed functions of dutwrapper (Java language).
+This file will list all version log for modified, added or removed functions of dutwrapper wiht Java language.
+
+## 1.11.1
+- [Fixed] Fixed issue cause duplicate re-study subject results.
+- [Changed] Property `id` in `AccountInformation.SubjectResult` changed from ~~`String`~~ to `AccountInformation.SubjectCode`.
 
 ## 1.11.0
-- Merge all class in `model` package to `AccountInformation` class.
-- Moving `Account` class functions to `Accounts` class and this will return each data type in `AccountInformation` class.
-- Change some properties in `AccountInfrormation` class (merged from whole class in `model` package). You'll need to modify your code to working again.
-- Optimize codes.
+- [Changed] Merge all class in `model` package to `AccountInformation` class.
+- [Changed] Moving `Account` class functions to `Accounts` class and this will return each data type in `AccountInformation` class.
+- [Changed] Change some properties in `AccountInfrormation` class (merged from whole class in `model` package). You'll need to modify your code to working again.
+- [Implemented] Optimize codes.
 
 ## 1.10.2
-- Merge all class related to News into once.
-- Merge all class related to Utils into once.
-- SetPrintStackTrace in HttpClientWrapper has been moved to `Variables` class.
-- Updated Gradle to 8.9 and all dependencies to latest.
+- [Changed] Merge all class related to News into once.
+- [Changed] Merge all class related to Utils into once.
+- [Changed] SetPrintStackTrace in HttpClientWrapper has been moved to `Variables` class.
+- [Implemented] Updated Gradle to 8.9 and all dependencies to latest.
 
 ## 1.10.1
 - [New] We're trying to sync properties serialize name between Java, Net, Python.
 - [Changed] Updated dependencies to latest.
+- [Changed] Removed `NewsGlobalGroupByDate` and `NewsSubjectGroupByDate`.
 - [Fixed] `java.net.UnknownHostException` was thrown even you include them in try-catch.
-- [Removed] Removed `NewsGlobalGroupByDate`.
 
 ## 1.10.0
 - `Account.Session` class is now in part of Account class.

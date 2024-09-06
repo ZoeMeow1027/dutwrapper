@@ -604,7 +604,7 @@ public class Accounts {
                     Integer.parseInt(cellList.get(0).text()),
                     cellList.get(1).text(),
                     cellList.get(2).hasClass("GridCheck"),
-                    cellList.get(3).text(),
+                    new AccountInformation.SubjectCode(cellList.get(3).text()),
                     cellList.get(4).text(),
                     Utils.jsoupExtraUtils.elementToDoubleOrNull(cellList.get(5)),
                     cellList.get(6).text().isEmpty() ? null : cellList.get(6).text(),
@@ -619,7 +619,8 @@ public class Accounts {
                     Utils.jsoupExtraUtils.elementToDoubleOrNull(cellList.get(15)),
                     Utils.jsoupExtraUtils.elementToDoubleOrNull(cellList.get(16)),
                     cellList.get(17).text(),
-                    accSubjectResult.stream().anyMatch(p -> p.getName().contains(cellList.get(4).text())));
+                    accSubjectResult.stream().anyMatch(p -> p.getId().getSubjectId().compareTo(new AccountInformation.SubjectCode(cellList.get(3).text()).getSubjectId() != null ? (new AccountInformation.SubjectCode(cellList.get(3).text()).getSubjectId()) : "") == 0)
+            );
 
             accSubjectResult.add(item);
         }
