@@ -337,7 +337,7 @@ public class News {
                 newsType == null ? NewsType.Global.toString() : newsType.toString(),
                 page == null ? 1 : page,
                 searchType == null ? NewsSearchType.ByTitle.toString() : searchType.toString(),
-                URLEncoder.encode(searchQuery == null ? "" : searchQuery, StandardCharsets.UTF_8.toString()));
+                URLEncoder.encode(searchQuery == null ? "" : searchQuery, "UTF-8"));
 
         HttpClientWrapper.Response response = HttpClientWrapper.get(url, null, 60);
         response.throwExceptionIfExist();
@@ -352,7 +352,7 @@ public class News {
         }
 
         Document webData = Jsoup.parse(response.getContent());
-        webData.outputSettings().charset(StandardCharsets.UTF_8);
+        webData.outputSettings().charset("UTF-8");
         for (Element el : webData.getElementsByTag("br")) {
             el.remove();
         }
