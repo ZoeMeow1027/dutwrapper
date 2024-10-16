@@ -12,6 +12,7 @@ public class Variables {
     public final static String URL_SV_SUBJECTFEE = "http://sv.dut.udn.vn/WebAjax/evLopHP_Load.aspx?E=THPhiLoad&Code=%d%d%d";
     public final static String URL_SV_ACCOUNTINFORMATION = "http://sv.dut.udn.vn/PageCaNhan.aspx";
     public final static String URL_SV_ACCOUNTTRAININGSTATUS = "http://sv.dut.udn.vn/PageKQRL.aspx";
+    public final static String URL_SV_FORMREQUESTED = "http://sv.dut.udn.vn/PageLapDonXN.aspx";
     public final static String USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:126.0) Gecko/20100101 Firefox/126.0";
 
     private static boolean _showDebugLog = false;

@@ -2,6 +2,14 @@
 
 This file will list all version log for modified, added or removed functions of dutwrapper wiht Java language.
 
+## 1.11.2
+- [New] Form requested (Lập đơn xác nhận)
+  - You will need to login with your account to use that.
+- [Implemented] Updated Gradle to 8.10.2 and all dependencies to latest.
+
+## 1.11.1-patch1
+- [Changed] Changed `StandardCharsets.UTF_8.toString()` to `"UTF-8"` to avoid error in Android.
+
 ## 1.11.1
 - [Fixed] Fixed issue cause duplicate re-study subject results.
 - [Changed] Property `id` in `AccountInformation.SubjectResult` changed from ~~`String`~~ to `AccountInformation.SubjectCode`.

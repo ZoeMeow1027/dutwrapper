@@ -4,7 +4,7 @@ plugins {
 }
 
 group 'io.dutwrapper'
-version '1.11.1-patch1'
+version '1.11.2'
 
 repositories {
     mavenCentral()
@@ -16,9 +16,8 @@ compileTestJava.options.encoding = 'UTF-8'
 // compileJava.options.javaModuleVersion = provider { project.version }
 
 dependencies {
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.0'
-    testImplementation 'org.junit.jupiter:junit-jupiter:5.8.1'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.0'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.11.2'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
     // This dependency is exported to consumers, that is to say found on their compile classpath.
     // commons-math3 - https://mvnrepository.com/artifact/org.apache.commons/commons-math3
@@ -26,7 +25,7 @@ dependencies {
 
     // This dependency is used internally, and not exposed to consumers on their own compile classpath.
     // Guava - https://mvnrepository.com/artifact/com.google.guava/guava
-    implementation 'com.google.guava:guava:33.2.1-jre'
+    implementation 'com.google.guava:guava:33.3.1-jre'
 
     // JSoup - https://mvnrepository.com/artifact/org.jsoup/jsoup
     implementation 'org.jsoup:jsoup:1.18.1'
@@ -58,9 +57,8 @@ publishing {
             }
         }
     }
-    publications {
-        gpr(MavenPublication) {
-            from(components.java)
-        }
-    }
+}
+
+tasks.named('updateDaemonJvm') {
+    jvmVersion = JavaVersion.VERSION_17
 }

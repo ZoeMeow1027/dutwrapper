@@ -38,6 +38,8 @@ public class AccountTest {
         System.out.println(gson.toJson(Accounts.fetchStudentInformation(session)));
         System.out.println("\nFetch account training status");
         System.out.println(gson.toJson(Accounts.fetchTrainingStatus(session)));
+        System.out.println("\nFetch account requested forms");
+        System.out.println(gson.toJson(Accounts.fetchFormRequest(session)));
         System.out.println("\nLogout and check if logged out");
         Accounts.logout(session);
         System.out.println(gson.toJson(Accounts.isLoggedIn(session)));

@@ -10,6 +10,8 @@ import javax.annotation.Nullable;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Accounts {
     public static class AuthInfo {
@@ -627,6 +629,98 @@ public class Accounts {
         result.setSubjectResultList(accSubjectResult);
 
         return result;
+    }
+
+    public static ArrayList<AccountInformation.FormRequest> fetchFormRequest(@Nonnull Session session) throws Exception {
+        if (!session.isValidSession())
+            throw new Exception("Invalid session!");
+
+        if (!isLoggedIn(session)) {
+            throw new Exception(
+                    "No account logged in this session. May be you haven't logged in or this session is expired?");
+        }
+
+        List<HttpClientWrapper.Header> headers = new ArrayList<>(Collections.singletonList(
+                new HttpClientWrapper.Header("Cookie",
+                        Utils.jsoupExtraUtils.sessionIdToSubCookie(session.getSessionId()))));
+        HttpClientWrapper.Response response = HttpClientWrapper.get(
+                Variables.URL_SV_FORMREQUESTED,
+                headers,
+                60);
+
+        if (response.getException() != null) {
+            throw response.getException();
+        }
+
+        if (response.getStatusCode() < 200 || response.getStatusCode() >= 300) {
+            throw new Exception(String.format(
+                    "Server was return with code %d. May be you haven't logged in or this session is expired?",
+                    response.getStatusCode()));
+        }
+
+        if (response.getContent() == null) {
+            return new ArrayList<>();
+        }
+
+        Document webData = Jsoup.parse(response.getContent());
+
+        ArrayList<AccountInformation.FormRequest> result = new ArrayList<>();
+
+        Element formRequest = webData.getElementById("LDDN_GridInfo");
+        if (formRequest != null) {
+            Elements requestItem = formRequest.getElementsByClass("GridRow");
+            if (!requestItem.isEmpty()) {
+                for (Element row : requestItem) {
+                    Elements cellList = row.getElementsByClass("GridCell");
+
+                    AccountInformation.FormRequest sf = new AccountInformation.FormRequest(
+                            cellList.get(1).text(),
+                            cellList.get(2).text(),
+                            cellList.get(3).text(),
+                            convertToDateTimeUnix(cellList.get(4).text()),
+                            Integer.parseInt(cellList.get(5).text()),
+                            convertToDateTimeUnix(cellList.get(10).text()),
+                            convertToDateTimeUnix(cellList.get(11).text()),
+                            convertToDateTimeUnix(cellList.get(12).text()),
+                            cellList.get(13).attr("class").contains("GridCheck"),
+                            cellList.get(14).text()
+                    );
+                    result.add(sf);
+                }
+            }
+
+        }
+
+        return result;
+    }
+
+    private static Long convertToDateTimeUnix(@Nonnull String formRequestTimeString) {
+        String regex = "(\\d{2}):(\\d{2}) (\\d{2})/(\\d{2})/(\\d{4})";
+        final Pattern pattern = Pattern.compile(regex, Pattern.MULTILINE);
+        final Matcher matcher = pattern.matcher(formRequestTimeString);
+
+        try {
+            if (matcher.find()) {
+                Calendar cal = Calendar.getInstance();
+                cal.set(Calendar.YEAR, Integer.parseInt(matcher.group(5)));
+                cal.set(Calendar.MONTH, Integer.parseInt(matcher.group(4)) - 1);
+                cal.set(Calendar.DAY_OF_MONTH, Integer.parseInt(matcher.group(3)));
+                cal.set(
+                        Calendar.HOUR,
+                        Integer.parseInt(matcher.group(1)) == 12
+                                ? 12
+                                : Integer.parseInt(matcher.group(2)) < 7
+                                ? Integer.parseInt(matcher.group(1)) + 12
+                                : Integer.parseInt(matcher.group(1))
+                );
+                cal.set(Calendar.MINUTE, Integer.parseInt(matcher.group(1)));
+                cal.set(Calendar.SECOND, 0);
+                return cal.toInstant().toEpochMilli();
+            }
+            else return 0L;
+        } catch (Exception ex) {
+            return 0L;
+        }
     }
 
 }

@@ -1299,4 +1299,120 @@ public class AccountInformation {
         }
     }
 
+    public static class FormRequest implements Serializable {
+        @SerializedName("id")
+        private String id;
+        @SerializedName("document_name")
+        private String documentName;
+        @SerializedName("document_additional_info")
+        private String documentAdditionalInfo;
+        @SerializedName("date_requested")
+        private Long dateRequested;
+        @SerializedName("quantity")
+        private Integer quantity;
+        @SerializedName("date_confirmed")
+        private Long dateConfirmed;
+        @SerializedName("response_date_printed")
+        private Long dateResponsePrinted;
+        @SerializedName("response_date_receivable")
+        private Long dateResponseReceivable;
+        @SerializedName("response_is_received")
+        private Boolean isResponseReceived;
+        @SerializedName("response_additional_info")
+        private String responseAdditionalInfo;
+
+        public FormRequest(String id, String documentName, String documentAdditionalInfo, Long dateRequested, Integer quantity, Long dateConfirmed, Long dateResponsePrinted, Long dateResponseReceivable, Boolean isResponseReceived, String responseAdditionalInfo) {
+            this.id = id;
+            this.documentName = documentName;
+            this.documentAdditionalInfo = documentAdditionalInfo;
+            this.dateRequested = dateRequested;
+            this.quantity = quantity;
+            this.dateConfirmed = dateConfirmed;
+            this.dateResponsePrinted = dateResponsePrinted;
+            this.dateResponseReceivable = dateResponseReceivable;
+            this.isResponseReceived = isResponseReceived;
+            this.responseAdditionalInfo = responseAdditionalInfo;
+        }
+
+        public String getId() {
+            return id;
+        }
+
+        public void setId(String id) {
+            this.id = id;
+        }
+
+        public String getDocumentName() {
+            return documentName;
+        }
+
+        public void setDocumentName(String documentName) {
+            this.documentName = documentName;
+        }
+
+        public String getDocumentAdditionalInfo() {
+            return documentAdditionalInfo;
+        }
+
+        public void setDocumentAdditionalInfo(String documentAdditionalInfo) {
+            this.documentAdditionalInfo = documentAdditionalInfo;
+        }
+
+        public Long getDateRequested() {
+            return dateRequested;
+        }
+
+        public void setDateRequested(Long dateRequested) {
+            this.dateRequested = dateRequested;
+        }
+
+        public Integer getQuantity() {
+            return quantity;
+        }
+
+        public void setQuantity(Integer quantity) {
+            this.quantity = quantity;
+        }
+
+        public Long getDateConfirmed() {
+            return dateConfirmed;
+        }
+
+        public void setDateConfirmed(Long dateConfirmed) {
+            this.dateConfirmed = dateConfirmed;
+        }
+
+        public Long getDateResponsePrinted() {
+            return dateResponsePrinted;
+        }
+
+        public void setDateResponsePrinted(Long dateResponsePrinted) {
+            this.dateResponsePrinted = dateResponsePrinted;
+        }
+
+        public Long getDateResponseReceivable() {
+            return dateResponseReceivable;
+        }
+
+        public void setDateResponseReceivable(Long dateResponseReceivable) {
+            this.dateResponseReceivable = dateResponseReceivable;
+        }
+
+        public Boolean getIsResponseReceived() {
+            return isResponseReceived;
+        }
+
+        public void setIsResponseReceived(Boolean received) {
+            isResponseReceived = received;
+        }
+
+        public String getResponseAdditionalInfo() {
+            return responseAdditionalInfo;
+        }
+
+        public void setResponseAdditionalInfo(String responseAdditionalInfo) {
+            this.responseAdditionalInfo = responseAdditionalInfo;
+        }
+    }
+
 }
