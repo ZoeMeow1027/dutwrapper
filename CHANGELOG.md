@@ -2,6 +2,10 @@
 
 This file will list all version log for modified, added or removed functions of dutwrapper wiht Java language.
 
+## 1.11.2-patch1
+- [Fixed] Fixed issue about java.lang.IndexOutOfBoundsException.
+  - This caused because of school page changes.
+
 ## 1.11.2
 - [New] Form requested (Lập đơn xác nhận)
   - You will need to login with your account to use that.

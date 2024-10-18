@@ -1310,8 +1310,6 @@ public class AccountInformation {
         private Long dateRequested;
         @SerializedName("quantity")
         private Integer quantity;
-        @SerializedName("date_confirmed")
-        private Long dateConfirmed;
         @SerializedName("response_date_printed")
         private Long dateResponsePrinted;
         @SerializedName("response_date_receivable")
@@ -1321,13 +1319,12 @@ public class AccountInformation {
         @SerializedName("response_additional_info")
         private String responseAdditionalInfo;
 
-        public FormRequest(String id, String documentName, String documentAdditionalInfo, Long dateRequested, Integer quantity, Long dateConfirmed, Long dateResponsePrinted, Long dateResponseReceivable, Boolean isResponseReceived, String responseAdditionalInfo) {
+        public FormRequest(String id, String documentName, String documentAdditionalInfo, Long dateRequested, Integer quantity, Long dateResponsePrinted, Long dateResponseReceivable, Boolean isResponseReceived, String responseAdditionalInfo) {
             this.id = id;
             this.documentName = documentName;
             this.documentAdditionalInfo = documentAdditionalInfo;
             this.dateRequested = dateRequested;
             this.quantity = quantity;
-            this.dateConfirmed = dateConfirmed;
             this.dateResponsePrinted = dateResponsePrinted;
             this.dateResponseReceivable = dateResponseReceivable;
             this.isResponseReceived = isResponseReceived;
@@ -1372,14 +1369,6 @@ public class AccountInformation {
 
         public void setQuantity(Integer quantity) {
             this.quantity = quantity;
-        }
-
-        public Long getDateConfirmed() {
-            return dateConfirmed;
-        }
-
-        public void setDateConfirmed(Long dateConfirmed) {
-            this.dateConfirmed = dateConfirmed;
         }
 
         public Long getDateResponsePrinted() {

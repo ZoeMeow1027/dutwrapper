@@ -679,11 +679,10 @@ public class Accounts {
                             cellList.get(3).text(),
                             convertToDateTimeUnix(cellList.get(4).text()),
                             Integer.parseInt(cellList.get(5).text()),
+                            convertToDateTimeUnix(cellList.get(9).text()),
                             convertToDateTimeUnix(cellList.get(10).text()),
-                            convertToDateTimeUnix(cellList.get(11).text()),
-                            convertToDateTimeUnix(cellList.get(12).text()),
-                            cellList.get(13).attr("class").contains("GridCheck"),
-                            cellList.get(14).text()
+                            cellList.get(11).attr("class").contains("GridCheck"),
+                            cellList.get(12).text()
                     );
                     result.add(sf);
                 }
